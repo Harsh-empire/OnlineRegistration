@@ -1,0 +1,2785 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration & Dashboard</title>
+    
+    <!-- Using Tailwind CDN for now - TODO: switch to local build for production -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Custom styles - trying to make this look cool! */
+
+        :root {
+            --app-font-size: 16px;
+        }
+
+        html {
+            font-size: var(--app-font-size);
+        }
+        
+        /* Animated background - spent way too long on this lol */
+        body {
+            background: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body.theme-dark {
+            background: linear-gradient(-45deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1f2937 75%, #0f172a 100%);
+            color: #e2e8f0;
+        }
+
+        body.theme-dark .glass-effect,
+        body.theme-dark .bg-white {
+            background: rgba(15, 23, 42, 0.88) !important;
+            border-color: rgba(148, 163, 184, 0.3) !important;
+            color: #e2e8f0;
+        }
+
+        body.theme-dark main {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.92)) !important;
+        }
+
+        body.theme-dark .bg-gradient-to-br.from-gray-50.to-purple-50,
+        body.theme-dark .bg-gradient-to-br.from-gray-50.to-gray-100,
+        body.theme-dark .bg-gradient-to-br.from-gray-50.via-blue-50.to-purple-50,
+        body.theme-dark .bg-gradient-to-br.from-gray-50.via-emerald-50.to-teal-50,
+        body.theme-dark .bg-gradient-to-br.from-white.to-purple-50 {
+            background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9)) !important;
+        }
+
+        body.theme-dark .bg-gradient-to-br.from-blue-50.to-blue-100,
+        body.theme-dark .bg-gradient-to-br.from-green-50.to-green-100,
+        body.theme-dark .bg-gradient-to-br.from-yellow-50.to-yellow-100,
+        body.theme-dark .bg-gradient-to-br.from-yellow-50.to-orange-50,
+        body.theme-dark .bg-gradient-to-br.from-purple-50.to-indigo-50,
+        body.theme-dark .bg-gradient-to-br.from-emerald-100.to-teal-100,
+        body.theme-dark .bg-gradient-to-br.from-indigo-100.to-purple-100 {
+            background-image: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.92)) !important;
+        }
+
+        body.theme-dark .form-input {
+            background: rgba(30, 41, 59, 0.85);
+            border-color: rgba(148, 163, 184, 0.4);
+            color: #e2e8f0;
+        }
+
+        body.theme-dark .form-input::placeholder {
+            color: rgba(226, 232, 240, 0.4);
+        }
+
+        body.theme-dark .metric-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(59, 130, 246, 0.2)) !important;
+            border-color: rgba(99, 102, 241, 0.35);
+            color: #e2e8f0;
+        }
+
+        body.theme-dark .nav-link {
+            color: #e2e8f0;
+        }
+
+        body.theme-dark .nav-link:hover {
+            color: #c7d2fe;
+        }
+
+        body.theme-dark .text-gray-800 { color: #f8fafc !important; }
+        body.theme-dark .text-gray-700 { color: #e2e8f0 !important; }
+        body.theme-dark .text-gray-600 { color: #cbd5f5 !important; }
+        body.theme-dark .text-gray-500 { color: #94a3b8 !important; }
+        body.theme-dark .text-blue-900,
+        body.theme-dark .text-blue-700,
+        body.theme-dark .text-blue-600,
+        body.theme-dark .text-blue-500,
+        body.theme-dark .text-green-900,
+        body.theme-dark .text-green-700,
+        body.theme-dark .text-green-600,
+        body.theme-dark .text-green-500,
+        body.theme-dark .text-yellow-900,
+        body.theme-dark .text-yellow-800,
+        body.theme-dark .text-yellow-700,
+        body.theme-dark .text-yellow-600,
+        body.theme-dark .text-purple-700,
+        body.theme-dark .text-purple-600,
+        body.theme-dark .text-purple-500 {
+            color: #e2e8f0 !important;
+        }
+
+        body.theme-dark .bg-green-100,
+        body.theme-dark .bg-blue-100,
+        body.theme-dark .bg-yellow-100,
+        body.theme-dark .bg-purple-100,
+        body.theme-dark .bg-green-200,
+        body.theme-dark .bg-blue-200,
+        body.theme-dark .bg-yellow-200,
+        body.theme-dark .bg-purple-200 {
+            background-color: rgba(30, 41, 59, 0.6) !important;
+            color: #e2e8f0;
+        }
+
+        body.theme-dark .border-blue-200,
+        body.theme-dark .border-green-200,
+        body.theme-dark .border-yellow-200,
+        body.theme-dark .border-purple-200,
+        body.theme-dark .border-purple-100,
+        body.theme-dark .border-green-100,
+        body.theme-dark .border-yellow-100,
+        body.theme-dark .border-blue-100 {
+            border-color: rgba(99, 102, 241, 0.3) !important;
+        }
+
+        body.high-contrast {
+            filter: contrast(1.2) saturate(1.1);
+        }
+
+        body.reduce-motion *,
+        body.reduce-motion *::before,
+        body.reduce-motion *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+
+        body[data-colorblind="protanopia"] {
+            filter: url('#protanopiaFilter');
+        }
+
+        body[data-colorblind="deuteranopia"] {
+            filter: url('#deuteranopiaFilter');
+        }
+
+        body[data-colorblind="tritanopia"] {
+            filter: url('#tritanopiaFilter');
+        }
+
+        body[data-colorblind="grayscale"] {
+            filter: grayscale(100%);
+        }
+        
+        /* Glass effect - learned this from a YouTube tutorial */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Input styling */
+        .form-input {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(249, 250, 251, 0.8);
+        }
+        
+        .form-input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2), 0 10px 15px -3px rgba(139, 92, 246, 0.1);
+            transform: translateY(-2px);
+            background: white;
+        }
+        
+        .form-input:hover {
+            border-color: #a78bfa;
+            background: white;
+        }
+        
+        .form-group label {
+            margin-bottom: 6px;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+        
+        /* Error shake animation */
+        .error-message {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #ef4444;
+            animation: shake 0.3s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .dashboard-container {
+            min-height: 90vh; 
+            max-width: 96%;
+        }
+        
+        /* Button styles with hover effect */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Shimmer effect I found online - pretty neat! */
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+        }
+        
+        .btn-success:hover {
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+        
+        /* Card slide in animation */
+        .card-entrance {
+            animation: cardSlideIn 0.5s ease-out;
+        }
+        
+        @keyframes cardSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Metric cards - hover makes them pop */
+        .metric-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Navigation links */
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            transform: translateX(5px);
+        }
+        
+        /* Success checkmark pop effect */
+        @keyframes checkmarkPop {
+            0% { transform: scale(0) rotate(45deg); }
+            50% { transform: scale(1.2) rotate(45deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .success-icon {
+            animation: checkmarkPop 0.6s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 font-sans antialiased">
+    
+    <!-- Main app container -->
+    <div id="app" class="w-full h-full flex items-center justify-center">
+        <!-- Dynamic content goes here -->
+    </div>
+
+    <!-- JavaScript - all the magic happens here -->
+    <script>
+        // Global state object - keeps track of user data
+        let appState = {
+            fullName: "Guest User",
+            email: "guest@example.com",
+            passwordHash: "",
+            country: "",
+            isRegistered: false,
+            rememberMe: false,
+            
+            // Dashboard data
+            projects: 12,
+            tasks: 5,
+            notifications: 3,
+            activityFeed: [
+                { id: 1, description: 'Monthly report submitted.', time: '2 mins ago' },
+                { id: 2, description: 'Updated Tailwind styling.', time: '1 hour ago' },
+                { id: 3, description: 'Review required on Profile page.', time: 'Yesterday' },
+            ],
+            
+            // Projects list
+            projectsList: [
+                { id: 1, name: 'Website Redesign', status: 'In Progress', progress: 75, dueDate: 'Nov 15, 2025' },
+                { id: 2, name: 'Mobile App Development', status: 'In Progress', progress: 60, dueDate: 'Dec 1, 2025' },
+                { id: 3, name: 'Marketing Campaign', status: 'Completed', progress: 100, dueDate: 'Oct 30, 2025' },
+                { id: 4, name: 'Database Migration', status: 'In Progress', progress: 45, dueDate: 'Nov 20, 2025' },
+                { id: 5, name: 'Security Audit', status: 'Pending', progress: 20, dueDate: 'Dec 10, 2025' },
+                { id: 6, name: 'API Integration', status: 'In Progress', progress: 80, dueDate: 'Nov 8, 2025' },
+                { id: 7, name: 'User Testing Phase 2', status: 'Completed', progress: 100, dueDate: 'Oct 25, 2025' },
+                { id: 8, name: 'Documentation Update', status: 'In Progress', progress: 55, dueDate: 'Nov 12, 2025' },
+                { id: 9, name: 'Performance Optimization', status: 'Pending', progress: 30, dueDate: 'Nov 25, 2025' },
+                { id: 10, name: 'Cloud Infrastructure Setup', status: 'Completed', progress: 100, dueDate: 'Oct 20, 2025' },
+                { id: 11, name: 'Customer Portal', status: 'In Progress', progress: 65, dueDate: 'Dec 5, 2025' },
+                { id: 12, name: 'Analytics Dashboard', status: 'In Progress', progress: 50, dueDate: 'Nov 30, 2025' }
+            ],
+            
+            // Tasks list
+            tasksList: [
+                { id: 1, title: 'Fix login button bug', priority: 'High', status: 'Pending', assignee: 'You' },
+                { id: 2, title: 'Update user documentation', priority: 'Medium', status: 'In Progress', assignee: 'You' },
+                { id: 3, title: 'Review pull request #234', priority: 'High', status: 'Pending', assignee: 'You' },
+                { id: 4, title: 'Deploy to staging server', priority: 'Low', status: 'Pending', assignee: 'Team' },
+                { id: 5, title: 'Create test cases for checkout', priority: 'Medium', status: 'Pending', assignee: 'You' }
+            ],
+            
+            // Alerts list
+            alertsList: [
+                { id: 1, message: 'Email verification pending.', type: 'email', resolved: false },
+                { id: 2, message: 'Update your profile picture.', type: 'profile', resolved: false },
+                { id: 3, message: 'Review new privacy policy.', type: 'policy', resolved: false }
+            ],
+
+            // Profile details stash
+            profile: {
+                firstName: '',
+                lastName: '',
+                username: '',
+                phone: '',
+                avatar: '',
+                dob: '',
+                gender: '',
+                country: '',
+                city: '',
+                address: '',
+                website: '',
+                twitter: '',
+                linkedin: '',
+                facebook: '',
+                instagram: '',
+                bio: '',
+                language: 'en',
+                timezone: 'Asia/Kolkata',
+                notifications: {
+                    newsletter: true,
+                    productUpdates: true,
+                    securityAlerts: true
+                },
+                privacy: {
+                    profilePublic: false,
+                    showEmail: false,
+                    showActivity: false
+                }
+            },
+            settings: {
+                appearance: {
+                    theme: 'system',
+                    fontSize: 'medium',
+                    highContrast: false,
+                    reduceMotion: false,
+                    colorblindFilter: 'none'
+                },
+                account: {
+                    twoFactorEnabled: false,
+                    activeSessions: [
+                        { id: 'current-device', device: 'This device', location: 'Unknown location', lastActive: 'Just now', isCurrent: true },
+                        { id: 'ios15', device: 'iPhone 15 • Safari', location: 'Bengaluru, IN', lastActive: '2 days ago', isCurrent: false }
+                    ]
+                },
+                notifications: {
+                    push: {
+                        newMessages: true,
+                        mentions: true,
+                        likesComments: false
+                    },
+                    email: {
+                        newsletter: false,
+                        productUpdates: false,
+                        securityAlerts: true
+                    },
+                    inAppSounds: true
+                },
+                privacy: {
+                    profileVisibility: 'private',
+                    blockedUsers: [],
+                    dataSharing: {
+                        thirdPartyPartners: false,
+                        analytics: true
+                    }
+                },
+                application: {
+                    language: 'en',
+                    timezone: 'Asia/Kolkata',
+                    autoDetectTimezone: true,
+                    connectedAccounts: {
+                        google: false,
+                        twitter: false,
+                        github: false
+                    },
+                    defaultView: '#dashboard'
+                },
+                help: {
+                    appVersion: '2.1.5'
+                }
+            }
+    };
+
+    const defaultAppState = JSON.parse(JSON.stringify(appState));
+        
+        // Load saved credentials from localStorage
+        function loadSavedCredentials() {
+            const saved = localStorage.getItem('userCredentials');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    appState.fullName = data.fullName || appState.fullName;
+                    appState.email = data.email || appState.email;
+                    appState.passwordHash = data.passwordHash || appState.passwordHash;
+                    appState.country = data.country || appState.country;
+                    appState.isRegistered = data.isRegistered ?? false;
+                    if (data.profile) {
+                        appState.profile = { ...appState.profile, ...data.profile };
+                    }
+                    if (data.settings) {
+                        const savedSettings = data.settings;
+                        appState.settings = {
+                            ...appState.settings,
+                            appearance: {
+                                ...appState.settings.appearance,
+                                ...savedSettings.appearance
+                            },
+                            account: {
+                                ...appState.settings.account,
+                                twoFactorEnabled: savedSettings.account?.twoFactorEnabled ?? appState.settings.account.twoFactorEnabled,
+                                activeSessions: savedSettings.account?.activeSessions
+                                    ? savedSettings.account.activeSessions.map(session => ({ ...session }))
+                                    : appState.settings.account.activeSessions.map(session => ({ ...session }))
+                            },
+                            notifications: {
+                                ...appState.settings.notifications,
+                                push: {
+                                    ...appState.settings.notifications.push,
+                                    ...savedSettings.notifications?.push
+                                },
+                                email: {
+                                    ...appState.settings.notifications.email,
+                                    ...savedSettings.notifications?.email
+                                },
+                                inAppSounds: savedSettings.notifications?.inAppSounds ?? appState.settings.notifications.inAppSounds
+                            },
+                            privacy: {
+                                ...appState.settings.privacy,
+                                profileVisibility: savedSettings.privacy?.profileVisibility || appState.settings.privacy.profileVisibility,
+                                blockedUsers: savedSettings.privacy?.blockedUsers ? [...savedSettings.privacy.blockedUsers] : [...appState.settings.privacy.blockedUsers],
+                                dataSharing: {
+                                    ...appState.settings.privacy.dataSharing,
+                                    ...savedSettings.privacy?.dataSharing
+                                }
+                            },
+                            application: {
+                                ...appState.settings.application,
+                                language: savedSettings.application?.language || appState.settings.application.language,
+                                timezone: savedSettings.application?.timezone || appState.settings.application.timezone,
+                                autoDetectTimezone: savedSettings.application?.autoDetectTimezone ?? appState.settings.application.autoDetectTimezone,
+                                connectedAccounts: {
+                                    ...appState.settings.application.connectedAccounts,
+                                    ...savedSettings.application?.connectedAccounts
+                                },
+                                defaultView: savedSettings.application?.defaultView || appState.settings.application.defaultView
+                            },
+                            help: {
+                                ...appState.settings.help,
+                                ...savedSettings.help
+                            }
+                        };
+                    }
+                    if (data.alertsList) {
+                        appState.alertsList = data.alertsList;
+                    }
+                    appState.rememberMe = data.rememberMe ?? true;
+                    updateDashboardCounts();
+                    applyGlobalPreferences();
+                } catch (e) {
+                    console.log('Error loading credentials');
+                }
+            }
+        }
+        
+        // Save credentials to localStorage
+        function saveCredentials() {
+            if (appState.rememberMe) {
+                const data = {
+                    fullName: appState.fullName,
+                    email: appState.email,
+                    passwordHash: appState.passwordHash,
+                    country: appState.country,
+                    isRegistered: appState.isRegistered,
+                    profile: appState.profile,
+                    alertsList: appState.alertsList,
+                    settings: appState.settings,
+                    rememberMe: true
+                };
+                localStorage.setItem('userCredentials', JSON.stringify(data));
+            }
+        }
+        
+        // Clear saved credentials
+        function clearCredentials() {
+            localStorage.removeItem('userCredentials');
+            appState.rememberMe = false;
+        }
+
+        // Recalculate dashboard numbers so cards stay legit
+        function updateDashboardCounts() {
+            appState.projects = appState.projectsList.length;
+            appState.tasks = appState.tasksList.filter(task => task.status !== 'Completed').length;
+            appState.notifications = appState.alertsList.filter(alert => !alert.resolved).length;
+        }
+
+        const rootElement = document.getElementById('app');
+
+        // Country list - yes it's long but works fine
+        const countryOptions = `
+            <option value="" disabled selected>--- Select your Country ---</option>
+            <option value="af">Afghanistan</option><option value="al">Albania</option><option value="dz">Algeria</option>
+            <option value="ad">Andorra</option><option value="ao">Angola</option><option value="ar">Argentina</option>
+            <option value="am">Armenia</option><option value="au">Australia</option><option value="at">Austria</option>
+            <option value="az">Azerbaijan</option><option value="bs">Bahamas</option><option value="bh">Bahrain</option>
+            <option value="bd">Bangladesh</option><option value="bb">Barbados</option><option value="be">Belgium</option>
+            <option value="bz">Belize</option><option value="bj">Benin</option><option value="bt">Bhutan</option>
+            <option value="bo">Bolivia</option><option value="ba">Bosnia and Herzegovina</option><option value="bw">Botswana</option>
+            <option value="br">Brazil</option><option value="bg">Bulgaria</option><option value="kh">Cambodia</option>
+            <option value="cm">Cameroon</option><option value="ca">Canada</option><option value="cl">Chile</option>
+            <option value="cn">China</option><option value="co">Colombia</option><option value="cr">Costa Rica</option>
+            <option value="hr">Croatia</option><option value="cu">Cuba</option><option value="cy">Cyprus</option>
+            <option value="cz">Czechia</option><option value="dk">Denmark</option><option value="do">Dominican Republic</option>
+            <option value="ec">Ecuador</option><option value="eg">Egypt</option><option value="sv">El Salvador</option>
+            <option value="ee">Estonia</option><option value="et">Ethiopia</option><option value="fj">Fiji</option>
+            <option value="fi">Finland</option><option value="fr">France</option><option value="ge">Georgia</option>
+            <option value="de">Germany</option><option value="gh">Ghana</option><option value="gr">Greece</option>
+            <option value="gt">Guatemala</option><option value="hn">Honduras</option><option value="hk">Hong Kong</option>
+            <option value="hu">Hungary</option><option value="is">Iceland</option><option value="in">India</option>
+            <option value="id">Indonesia</option><option value="ir">Iran</option><option value="iq">Iraq</option>
+            <option value="ie">Ireland</option><option value="il">Israel</option><option value="it">Italy</option>
+            <option value="jm">Jamaica</option><option value="jp">Japan</option><option value="jo">Jordan</option>
+            <option value="kz">Kazakhstan</option><option value="ke">Kenya</option><option value="kr">South Korea</option>
+            <option value="kw">Kuwait</option><option value="kg">Kyrgyzstan</option><option value="lv">Latvia</option>
+            <option value="lb">Lebanon</option><option value="ly">Libya</option><option value="lt">Lithuania</option>
+            <option value="lu">Luxembourg</option><option value="mg">Madagascar</option><option value="my">Malaysia</option>
+            <option value="mv">Maldives</option><option value="mx">Mexico</option><option value="md">Moldova</option>
+            <option value="mc">Monaco</option><option value="mn">Mongolia</option><option value="ma">Morocco</option>
+            <option value="mz">Mozambique</option><option value="np">Nepal</option><option value="nl">Netherlands</option>
+            <option value="nz">New Zealand</option><option value="ng">Nigeria</option><option value="no">Norway</option>
+            <option value="om">Oman</option><option value="pk">Pakistan</option><option value="pa">Panama</option>
+            <option value="py">Paraguay</option><option value="pe">Peru</option><option value="ph">Philippines</option>
+            <option value="pl">Poland</option><option value="pt">Portugal</option><option value="qa">Qatar</option>
+            <option value="ro">Romania</option><option value="ru">Russia</option><option value="sa">Saudi Arabia</option>
+            <option value="sn">Senegal</option><option value="rs">Serbia</option><option value="sg">Singapore</option>
+            <option value="sk">Slovakia</option><option value="si">Slovenia</option><option value="za">South Africa</option>
+            <option value="es">Spain</option><option value="lk">Sri Lanka</option><option value="se">Sweden</option>
+            <option value="ch">Switzerland</option><option value="tw">Taiwan</option><option value="tz">Tanzania</option>
+            <option value="th">Thailand</option><option value="tt">Trinidad and Tobago</option><option value="tn">Tunisia</option>
+            <option value="tr">Turkey</option><option value="ug">Uganda</option><option value="ua">Ukraine</option>
+            <option value="ae">United Arab Emirates</option><option value="gb">United Kingdom</option><option value="us">United States</option>
+            <option value="uy">Uruguay</option><option value="ve">Venezuela</option><option value="vn">Vietnam</option>
+            <option value="zm">Zambia</option><option value="zw">Zimbabwe</option>
+        `;
+
+        function buildCountryOptions(selectedValue) {
+            if (!selectedValue) {
+                return countryOptions;
+            }
+            return countryOptions
+                .replace('disabled selected', 'disabled')
+                .replace(`value="${selectedValue}"`, `value="${selectedValue}" selected`);
+        }
+        
+        // Get country name from code
+        function getCountryName(code) {
+            const match = countryOptions.match(new RegExp(`value="${code}">(.*?)<\/option>`));
+            return match ? match[1] : 'The World';
+        }
+
+        // Lightweight toast notifications so the UX feels alive
+        function showToast(message, type = 'success') {
+            let container = document.getElementById('toastContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.className = 'fixed bottom-6 right-6 flex flex-col gap-3 z-50';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `px-5 py-3 rounded-xl shadow-xl text-sm font-semibold text-white transition-all duration-300 ${type === 'error' ? 'bg-red-500' : 'bg-gradient-to-r from-purple-500 to-indigo-500'}`;
+            toast.textContent = message;
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(12px)';
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            });
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(12px)';
+                setTimeout(() => toast.remove(), 250);
+            }, 2800);
+        }
+
+        function persistStateIfRemembered() {
+            if (appState.rememberMe) {
+                saveCredentials();
+            }
+        }
+
+        function getDefaultProfileState() {
+            return JSON.parse(JSON.stringify(defaultAppState.profile));
+        }
+
+        function handleProfileRemoval() {
+            if (!confirm('Remove all saved profile details?')) {
+                return;
+            }
+            appState.profile = getDefaultProfileState();
+            appState.fullName = defaultAppState.fullName;
+            appState.country = defaultAppState.country;
+            persistStateIfRemembered();
+            showToast('Profile data cleared.');
+            renderProfilePage();
+        }
+
+        function handleAccountDeletion() {
+            if (!confirm('This will delete your account and stored data. Continue?')) {
+                return;
+            }
+            clearCredentials();
+            appState = JSON.parse(JSON.stringify(defaultAppState));
+            updateDashboardCounts();
+            applyGlobalPreferences();
+            window.location.hash = '#register';
+            routeApp();
+            setTimeout(() => showToast('Account deleted successfully.'), 100);
+        }
+
+        function logoutOtherSessions() {
+            appState.settings.account.activeSessions = appState.settings.account.activeSessions.filter(session => session.isCurrent);
+            persistStateIfRemembered();
+            showToast('Logged out of other devices.');
+            renderSettingsPage();
+        }
+
+        function removeSessionById(sessionId) {
+            const sessions = appState.settings.account.activeSessions;
+            appState.settings.account.activeSessions = sessions.filter(session => session.id !== sessionId);
+            persistStateIfRemembered();
+            showToast('Session removed.');
+            renderSettingsPage();
+        }
+
+        function handleDataExport() {
+            showToast('Preparing your data export...');
+            setTimeout(() => showToast('Data export ready! Check your inbox.'), 1500);
+        }
+
+        function handleConnectedAccountToggle(provider) {
+            const current = !!appState.settings.application.connectedAccounts[provider];
+            appState.settings.application.connectedAccounts[provider] = !current;
+            persistStateIfRemembered();
+            showToast(`${current ? 'Disconnected' : 'Linked'} ${provider.charAt(0).toUpperCase() + provider.slice(1)} account.`);
+            renderSettingsPage();
+        }
+
+        function handleBlockedUserRemoval(username) {
+            appState.settings.privacy.blockedUsers = appState.settings.privacy.blockedUsers.filter(user => user !== username);
+            persistStateIfRemembered();
+            showToast(`${username} unblocked.`);
+            renderSettingsPage();
+        }
+
+        function handleAutoDetectTimezone() {
+            try {
+                const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (detected) {
+                    appState.settings.application.timezone = detected;
+                    appState.settings.application.autoDetectTimezone = true;
+                    appState.profile.timezone = detected;
+                    persistStateIfRemembered();
+                    showToast(`Timezone set to ${detected}.`);
+                    renderSettingsPage();
+                }
+            } catch (error) {
+                showToast('Could not detect timezone automatically.', 'error');
+            }
+        }
+
+        let systemThemeMediaQuery = null;
+
+        function handleSystemThemeChange() {
+            applyThemePreference();
+        }
+
+        function updateSystemThemeWatcher() {
+            if (systemThemeMediaQuery) {
+                if (systemThemeMediaQuery.removeEventListener) {
+                    systemThemeMediaQuery.removeEventListener('change', handleSystemThemeChange);
+                } else if (systemThemeMediaQuery.removeListener) {
+                    systemThemeMediaQuery.removeListener(handleSystemThemeChange);
+                }
+                systemThemeMediaQuery = null;
+            }
+
+            if (appState.settings?.appearance?.theme === 'system' && window.matchMedia) {
+                systemThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                if (systemThemeMediaQuery.addEventListener) {
+                    systemThemeMediaQuery.addEventListener('change', handleSystemThemeChange);
+                } else if (systemThemeMediaQuery.addListener) {
+                    systemThemeMediaQuery.addListener(handleSystemThemeChange);
+                }
+            }
+        }
+
+        function applyThemePreference() {
+            const themeSetting = appState.settings?.appearance?.theme || 'system';
+            let resolvedTheme = themeSetting;
+            if (themeSetting === 'system' && window.matchMedia) {
+                resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            if (!document.body) return;
+
+            document.body.classList.remove('theme-dark', 'theme-light');
+            if (resolvedTheme === 'dark') {
+                document.body.classList.add('theme-dark');
+            } else {
+                document.body.classList.add('theme-light');
+            }
+
+            document.documentElement.style.colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
+        }
+
+        function applyFontSizePreference() {
+            const fontSizeSetting = appState.settings?.appearance?.fontSize || 'medium';
+            const sizeMap = {
+                small: '15px',
+                medium: '16px',
+                large: '18px'
+            };
+            const value = sizeMap[fontSizeSetting] || sizeMap.medium;
+            document.documentElement.style.setProperty('--app-font-size', value);
+        }
+
+        function applyColorblindFilterPreference() {
+            const filterSetting = appState.settings?.appearance?.colorblindFilter || 'none';
+            const validFilters = ['none', 'protanopia', 'deuteranopia', 'tritanopia', 'grayscale'];
+            const targetFilter = validFilters.includes(filterSetting) ? filterSetting : 'none';
+            if (!document.body) return;
+
+            if (targetFilter === 'none') {
+                document.body.removeAttribute('data-colorblind');
+            } else {
+                document.body.setAttribute('data-colorblind', targetFilter);
+            }
+        }
+
+        function applyAccessibilityPreferences() {
+            const highContrast = !!appState.settings?.appearance?.highContrast;
+            const reduceMotion = !!appState.settings?.appearance?.reduceMotion;
+            if (!document.body) return;
+            document.body.classList.toggle('high-contrast', highContrast);
+            document.body.classList.toggle('reduce-motion', reduceMotion);
+        }
+
+        function applyGlobalPreferences() {
+            applyThemePreference();
+            applyFontSizePreference();
+            applyColorblindFilterPreference();
+            applyAccessibilityPreferences();
+            updateSystemThemeWatcher();
+        }
+
+        // ===== VIEW FUNCTIONS =====
+
+        function renderLoginPage() {
+            // Center the login form
+            rootElement.classList.add('justify-center', 'items-center');
+            rootElement.classList.remove('justify-start', 'items-start', 'md:pt-10');
+
+            const loginHTML = `
+                <div class="w-full max-w-md bg-white p-10 rounded-2xl shadow-2xl glass-effect card-entrance transform hover:scale-[1.01] transition-all duration-300">
+                    <header class="text-center mb-8">
+                        <!-- Icon at top -->
+                        <div class="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                            </svg>
+                        </div>
+                        <h1 class="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent tracking-tight mb-3">
+                            Welcome Back
+                        </h1>
+                        <p class="text-gray-600 text-lg">
+                            Sign in to access your dashboard
+                        </p>
+                    </header>
+                    
+                    <form id="loginForm" action="#" method="POST" class="space-y-6"> 
+                        
+                        <!-- Email Input -->
+                        <div class="form-group">
+                            <label for="loginEmail" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                                    </svg>
+                                </div>
+                                <input 
+                                    type="email" 
+                                    id="loginEmail" 
+                                    name="loginEmail" 
+                                    required 
+                                    class="form-input mt-1 block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none text-gray-900"
+                                    placeholder="you@example.com"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Password Input -->
+                        <div class="form-group">
+                            <label for="loginPassword" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                </div>
+                                <input 
+                                    type="password" 
+                                    id="loginPassword" 
+                                    name="loginPassword" 
+                                    required 
+                                    class="form-input mt-1 block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none text-gray-900"
+                                    placeholder="Enter your password"
+                                >
+                            </div>
+                            <p id="loginError" class="error-message hidden"></p>
+                        </div>
+                        
+                        <!-- Remember Me Checkbox -->
+                        <div class="flex items-center">
+                            <input type="checkbox" id="rememberMe" name="rememberMe" class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
+                            <label for="rememberMe" class="ml-2 block text-sm text-gray-700 select-none">
+                                Remember me on this device
+                            </label>
+                        </div>
+
+                        <!-- Login Button -->
+                        <button 
+                            type="submit" 
+                            class="btn-success w-full flex justify-center items-center py-4 px-4 border-0 rounded-xl shadow-lg text-lg font-bold text-white focus:outline-none focus:ring-4 focus:ring-green-400 focus:ring-opacity-50 transition-all duration-300"
+                        >
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                            </svg>
+                            Log In
+                        </button>
+                    </form>
+
+                    <div class="mt-8 text-center">
+                        <p class="text-sm text-gray-600">
+                            Don't have an account? 
+                            <a href="#register" class="text-purple-600 hover:text-purple-800 font-semibold hover:underline transition-colors">Register Here</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            rootElement.innerHTML = loginHTML;
+            attachLoginListeners();
+        }
+        
+        function renderForm(initialData = appState) {
+            // Center the form
+            rootElement.classList.add('justify-center', 'items-center');
+            rootElement.classList.remove('justify-start', 'items-start', 'md:pt-10');
+
+            const formHTML = `
+                <div class="w-full max-w-2xl bg-white p-10 rounded-2xl shadow-2xl glass-effect card-entrance">
+                    <header class="text-center mb-10">
+                        <!-- Cool icon -->
+                        <div class="mx-auto w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-5 shadow-xl">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            </svg>
+                        </div>
+                        <h1 class="text-5xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent tracking-tight mb-3">
+                            Join Our Platform
+                        </h1>
+                        <p class="text-gray-600 text-lg">
+                            Create your personalized account in just a few steps
+                        </p>
+                    </header>
+                    
+                    <form id="registrationForm" action="#" method="POST" class="space-y-6"> 
+                        
+                        <!-- Full Name Input -->
+                        <div class="form-group">
+                            <label for="fullName" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    id="fullName" 
+                                    name="fullName" 
+                                    required 
+                                    class="form-input mt-1 block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none text-gray-900"
+                                    placeholder="Enter your full name"
+                                    value="${initialData.fullName !== "Guest User" ? initialData.fullName : ''}"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Email Input -->
+                        <div class="form-group">
+                            <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    required 
+                                    class="form-input mt-1 block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none text-gray-900"
+                                    placeholder="you@example.com"
+                                    value="${initialData.email !== "guest@example.com" ? initialData.email : ''}"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Password Input Group -->
+                        <div class="form-group" id="passwordGroup">
+                            <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                </div>
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    name="password" 
+                                    required 
+                                    class="form-input mt-1 block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none text-gray-900"
+                                    placeholder="Must be at least 8 characters"
+                                >
+                            </div>
+                            <p id="passwordError" class="error-message hidden"></p>
+                        </div>
+
+                        <!-- Confirm Password Input -->
+                        <div class="form-group" id="confirmPasswordGroup">
+                            <label for="confirmPassword" class="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                    </svg>
+                                </div>
+                                <input 
+                                    type="password" 
+                                    id="confirmPassword" 
+                                    name="confirmPassword" 
+                                    required 
+                                    class="form-input mt-1 block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none text-gray-900"
+                                    placeholder="Re-enter password"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Country Dropdown Select -->
+                        <div class="form-group">
+                            <label for="country" class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <select id="country" name="country" required class="form-input mt-1 block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none appearance-none bg-white text-gray-900">
+                                    <!-- Replaces the selected option in the full list -->
+                                    ${buildCountryOptions(initialData.country)}
+                                </select>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms checkbox -->
+                        <div class="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <input type="checkbox" id="terms" name="terms" required class="mt-1 h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
+                            <label for="terms" class="text-sm text-gray-700 select-none leading-relaxed">
+                                I agree to the <a href="#" class="text-purple-600 hover:text-purple-800 font-semibold hover:underline">Terms and Conditions</a> and <a href="#" class="text-purple-600 hover:text-purple-800 font-semibold hover:underline">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button 
+                            type="submit" 
+                            class="btn-primary w-full flex justify-center items-center py-4 px-6 border-0 rounded-xl shadow-lg text-lg font-bold text-white focus:outline-none focus:ring-4 focus:ring-purple-400 focus:ring-opacity-50 transition-all duration-300"
+                        >
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            Register Now
+                        </button>
+                    </form>
+
+                    <div class="mt-8 text-center">
+                        <p class="text-sm text-gray-600">
+                            Already have an account? 
+                            <a href="#login" class="text-purple-600 hover:text-purple-800 font-semibold hover:underline transition-colors">Log In</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            rootElement.innerHTML = formHTML;
+            attachFormListeners(); 
+        }
+
+        function renderSuccessPage() {
+            // Show success message after registration
+            const firstName = appState.fullName.split(' ')[0];
+            const countryName = getCountryName(appState.country);
+            const defaultRoute = appState.settings?.application?.defaultView || '#dashboard';
+            const routeLabelMap = {
+                '#dashboard': 'Dashboard',
+                '#profile': 'Profile',
+                '#settings': 'Settings',
+                '#support': 'Support'
+            };
+            const defaultRouteLabel = routeLabelMap[defaultRoute] || 'Dashboard';
+
+            const successHTML = `
+                <div class="w-full max-w-xl bg-white p-12 rounded-2xl shadow-2xl text-center glass-effect card-entrance">
+                    <!-- Success checkmark -->
+                    <div class="mx-auto w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-2xl success-icon">
+                        <svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    
+                    <h2 class="text-4xl font-extrabold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-3">
+                        Welcome, ${firstName}! 🎉
+                    </h2>
+                    <p class="text-gray-600 text-lg mb-8">Your registration is complete and your account is ready!</p>
+
+                    <!-- User info -->
+                    <div class="text-left space-y-3 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 shadow-inner mb-8">
+                        <p class="text-base font-bold text-gray-800 mb-3 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Account Summary
+                        </p>
+                        <div class="space-y-2 pl-7">
+                            <p class="text-sm text-gray-700 flex items-center">
+                                <span class="font-semibold mr-2">Email:</span> 
+                                <span class="text-purple-600">${appState.email}</span>
+                            </p>
+                            <p class="text-sm text-gray-700 flex items-center">
+                                <span class="font-semibold mr-2">Location:</span> 
+                                <span class="text-purple-600">${countryName}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Progress tracker -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-bold text-purple-700 mb-4 flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                            </svg>
+                            Onboarding Progress
+                        </h3>
+                        <!-- Progress bar -->
+                        <div class="w-full bg-gray-200 rounded-full h-3 shadow-inner mb-2">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full shadow-md transition-all duration-1000" style="width: 33%"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 font-medium">
+                            <span class="text-purple-600 font-bold">Step 1 of 3:</span> Complete! You're ready for the dashboard.
+                        </p>
+                    </div>
+
+                    <!-- Support link -->
+                    <p class="text-sm text-gray-500 mb-6">
+                        Need help? <a href="#" class="text-purple-600 hover:text-purple-800 font-semibold hover:underline">Contact Support</a>
+                    </p>
+
+                    <!-- Button to dashboard -->
+                    <a href="${defaultRoute}" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                        Go to ${defaultRouteLabel}
+                    </a>
+                </div>
+            `;
+            rootElement.innerHTML = successHTML;
+        }
+
+        // Sidebar builder so we don't copy/paste classes forever
+        function getSidebarHTML(activeRoute) {
+            return `
+                <nav class="w-full md:w-72 bg-gradient-to-br from-purple-50 to-indigo-50 p-6 border-b md:border-r md:border-b-0 border-purple-100 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none flex-shrink-0">
+                    <div class="mb-8">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Dashboard</h2>
+                        </div>
+                    </div>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#dashboard" class="nav-link flex items-center p-4 rounded-xl transition-all ${activeRoute === '#dashboard' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold shadow-md hover:from-purple-600 hover:to-indigo-600' : 'text-gray-700 hover:bg-white hover:shadow-md'}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                Overview
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#profile" class="nav-link flex items-center p-4 rounded-xl transition-all ${activeRoute === '#profile' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold shadow-md hover:from-purple-600 hover:to-indigo-600' : 'text-gray-700 hover:bg-white hover:shadow-md'}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#settings" class="nav-link flex items-center p-4 rounded-xl transition-all ${activeRoute === '#settings' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold shadow-md hover:from-purple-600 hover:to-indigo-600' : 'text-gray-700 hover:bg-white hover:shadow-md'}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                Settings
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#support" class="nav-link flex items-center p-4 rounded-xl transition-all ${activeRoute === '#support' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold shadow-md hover:from-purple-600 hover:to-indigo-600' : 'text-gray-700 hover:bg-white hover:shadow-md'}">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                                Support
+                            </a>
+                        </li>
+                        <li class="pt-6 mt-6 border-t border-purple-200">
+                            <a href="#" class="nav-link flex items-center p-4 text-red-600 rounded-xl hover:bg-red-50 hover:shadow-md transition-all" onclick="handleLogout()">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            `;
+        }
+
+        function renderDashboard() {
+            // Dashboard view
+            rootElement.classList.remove('justify-center', 'items-center');
+            rootElement.classList.add('justify-start', 'items-start', 'md:pt-10'); 
+            
+            const firstName = appState.fullName.split(' ')[0];
+            const countryName = getCountryName(appState.country);
+            updateDashboardCounts();
+
+            const dashboardHTML = `
+                <div class="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row dashboard-container glass-effect card-entrance">
+                    
+                    <!-- Sidebar navigation -->
+                    ${getSidebarHTML('#dashboard')}
+
+                    <!-- Main content -->
+                    <main class="flex-1 p-6 md:p-10 overflow-y-auto bg-gradient-to-br from-gray-50 to-purple-50">
+                        
+                        <!-- Header section -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-6 border-b-2 border-purple-100">
+                            <div>
+                                <h1 class="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-1">
+                                    Hello, ${firstName}! 👋
+                                </h1>
+                                <p class="text-gray-600">Welcome back to your dashboard</p>
+                            </div>
+                            <button class="flex items-center text-sm font-bold text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 px-6 py-3 rounded-xl shadow-lg hover:shadow-xl mt-4 sm:mt-0 transition-all duration-300 transform hover:scale-105">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                New Report
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            
+                            <!-- Main content column -->
+                            <section class="lg:col-span-2 space-y-8">
+                                
+                                <!-- Metrics -->
+                                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                                    <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    Current Snapshot
+                                </h2>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                    <!-- Project card -->
+                                    <div class="metric-card bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl shadow-lg border-2 border-blue-200" onclick="showProjectsModal()">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <p class="text-sm font-bold text-blue-700">Total Projects</p>
+                                            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                        </div>
+                                        <p class="text-4xl font-extrabold text-blue-900">${appState.projects}</p>
+                                        <p class="text-xs text-blue-600 mt-2">↑ 12% from last month</p>
+                                    </div>
+                                    <!-- Tasks card -->
+                                    <div class="metric-card bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl shadow-lg border-2 border-green-200" onclick="showTasksModal()">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <p class="text-sm font-bold text-green-700">Pending Tasks</p>
+                                            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                            </svg>
+                                        </div>
+                                        <p class="text-4xl font-extrabold text-green-900">${appState.tasks}</p>
+                                        <p class="text-xs text-green-600 mt-2">3 due this week</p>
+                                    </div>
+                                    <!-- Alerts card -->
+                                    <div class="metric-card bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl shadow-lg border-2 border-yellow-200">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <p class="text-sm font-bold text-yellow-700">Unread Alerts</p>
+                                            <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                            </svg>
+                                        </div>
+                                        <p class="text-4xl font-extrabold text-yellow-900">${appState.notifications}</p>
+                                        <p class="text-xs text-yellow-600 mt-2">2 require action</p>
+                                    </div>
+                                </div>
+
+                                <!-- Activity feed -->
+                                <div>
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                                        <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Recent Activity Feed
+                                    </h3>
+                                    <div class="space-y-4 p-6 bg-white rounded-2xl border-2 border-gray-200 shadow-lg">
+                                        ${appState.activityFeed.map(item => `
+                                            <div class="flex justify-between items-start p-4 hover:bg-purple-50 rounded-xl transition-all border-b last:border-b-0">
+                                                <div class="flex items-start space-x-3">
+                                                    <div class="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                                                    <p class="text-sm font-medium text-gray-800">${item.description}</p>
+                                                </div>
+                                                <span class="text-xs text-gray-500 font-semibold whitespace-nowrap ml-4">${item.time}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </section>
+                            
+                            <!-- Sidebar column -->
+                            <section class="lg:col-span-1 space-y-8">
+                                
+                                <!-- User profile -->
+                                <div class="bg-gradient-to-br from-white to-purple-50 p-6 rounded-2xl border-2 border-purple-200 shadow-xl">
+                                    <div class="flex items-center mb-6">
+                                        <!-- Avatar circle -->
+                                        <div class="h-16 w-16 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-2xl flex items-center justify-center font-bold text-2xl shadow-lg">
+                                            ${firstName.charAt(0)}
+                                        </div>
+                                        <div class="ml-4">
+                                            <h3 class="text-xl font-bold text-gray-800">${appState.fullName}</h3>
+                                            <p class="text-sm text-gray-600">Member since today</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-3 text-sm text-gray-700 pt-4 border-t-2 border-purple-100">
+                                        <p class="flex items-center">
+                                            <svg class="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                            </svg>
+                                            <strong>Email:</strong>&nbsp;
+                                            <span class="text-purple-700 font-medium">${appState.email}</span>
+                                        </p>
+                                        <p class="flex items-center">
+                                            <svg class="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            </svg>
+                                            <strong>Location:</strong>&nbsp;${countryName}
+                                        </p>
+                                        <p class="flex items-center pt-2">
+                                            <a href="#settings" class="text-purple-600 hover:text-purple-800 font-bold hover:underline flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                </svg>
+                                                Manage Settings
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Alerts panel -->
+                                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-2xl border-2 border-yellow-300 shadow-xl">
+                                    <h3 class="text-xl font-bold text-yellow-800 mb-4 flex items-center">
+                                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        Your Alerts <span class="ml-auto text-sm bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full">${appState.alertsList.filter(a => !a.resolved).length}</span>
+                                    </h3>
+                                    <ul class="space-y-3">
+                                        ${appState.alertsList.filter(a => !a.resolved).map(alert => `
+                                            <li class="flex items-start p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="handleAlertClick(${alert.id}, '${alert.type}')">
+                                                <svg class="w-5 h-5 mr-2 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    ${alert.type === 'email' ? 
+                                                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>' :
+                                                    alert.type === 'profile' ?
+                                                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>' :
+                                                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>'
+                                                    }
+                                                </svg>
+                                                <span class="text-sm text-gray-800 font-medium">${alert.message}</span>
+                                            </li>
+                                        `).join('')}
+                                        ${appState.alertsList.filter(a => !a.resolved).length === 0 ? 
+                                            '<li class="text-sm text-gray-600 text-center py-4">🎉 All alerts resolved!</li>' : 
+                                        ''}
+                                    </ul>
+                                </div>
+
+                            </section>
+                        </div>
+                    </main>
+                </div>
+            `;
+            rootElement.innerHTML = dashboardHTML;
+        }
+
+        function renderProfilePage() {
+            rootElement.classList.remove('justify-center');
+            rootElement.classList.add('justify-start', 'items-start', 'md:pt-10');
+
+            const profile = appState.profile;
+            const initials = `${(profile.firstName || '').charAt(0)}${(profile.lastName || '').charAt(0)}`.toUpperCase() || appState.fullName.slice(0, 2).toUpperCase();
+
+            const profileHTML = `
+                <div class="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row dashboard-container glass-effect card-entrance">
+                    ${getSidebarHTML('#profile')}
+                    <main class="flex-1 p-6 md:p-10 overflow-y-auto bg-gradient-to-br from-gray-50 to-purple-50">
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-10">
+                            <div class="bg-white rounded-2xl border-2 border-purple-100 shadow-xl p-6 flex flex-col items-center text-center">
+                                <div class="relative">
+                                    <div id="avatarInitial" class="${profile.avatar ? 'hidden' : ''} h-24 w-24 bg-gradient-to-br from-purple-500 to-indigo-500 text-white rounded-3xl flex items-center justify-center text-3xl font-extrabold shadow-lg">
+                                        ${initials}
+                                    </div>
+                                    <img id="avatarPreview" src="${profile.avatar || ''}" alt="Profile avatar" class="${profile.avatar ? '' : 'hidden'} h-24 w-24 rounded-3xl object-cover shadow-lg">
+                                    <label for="profileAvatar" class="absolute -bottom-2 -right-2 w-9 h-9 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full flex items-center justify-center shadow-md cursor-pointer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </label>
+                                </div>
+                                <input type="file" id="profileAvatar" accept="image/*" class="hidden"/>
+                                <button type="button" id="removeAvatarBtn" class="mt-3 text-xs font-semibold text-red-500 hover:text-red-600 transition ${profile.avatar ? '' : 'hidden'}">Remove photo</button>
+                                <h2 class="mt-4 text-2xl font-bold text-gray-800">${profile.firstName || ''} ${profile.lastName || ''}</h2>
+                                <p class="text-sm text-gray-500">@${profile.username || 'username'}</p>
+                                <p class="mt-3 text-gray-600 text-sm leading-relaxed">${profile.bio || 'Add a short bio to let everyone know what you do.'}</p>
+                            </div>
+                            <div class="xl:col-span-2 bg-white rounded-2xl border-2 border-purple-100 shadow-xl p-8">
+                                <form id="profileForm" class="space-y-10">
+                                    <section>
+                                        <header class="mb-4">
+                                            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                                <span class="mr-2">🔑</span> Essential Account Information
+                                            </h3>
+                                            <p class="text-sm text-gray-500">Keep your account secure with accurate basics.</p>
+                                        </header>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileEmail">Email Address</label>
+                                                <input type="email" id="profileEmail" name="profileEmail" value="${appState.email}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileUsername">Username</label>
+                                                <input type="text" id="profileUsername" name="profileUsername" value="${profile.username || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileNewPassword">New Password</label>
+                                                <input type="password" id="profileNewPassword" name="profileNewPassword" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="Leave blank to keep current">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileConfirmPassword">Confirm Password</label>
+                                                <input type="password" id="profileConfirmPassword" name="profileConfirmPassword" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="Re-enter new password">
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <header class="mb-4">
+                                            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                                <span class="mr-2">👤</span> Core Profile Details
+                                            </h3>
+                                            <p class="text-sm text-gray-500">Tell us a little more about yourself.</p>
+                                        </header>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileFirstName">First Name</label>
+                                                <input type="text" id="profileFirstName" name="profileFirstName" value="${profile.firstName || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileLastName">Last Name</label>
+                                                <input type="text" id="profileLastName" name="profileLastName" value="${profile.lastName || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileDob">Date of Birth</label>
+                                                <input type="date" id="profileDob" name="profileDob" value="${profile.dob || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileGender">Gender</label>
+                                                <select id="profileGender" name="profileGender" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                                    <option value="">Select gender</option>
+                                                    <option value="male" ${profile.gender === 'male' ? 'selected' : ''}>Male</option>
+                                                    <option value="female" ${profile.gender === 'female' ? 'selected' : ''}>Female</option>
+                                                    <option value="non-binary" ${profile.gender === 'non-binary' ? 'selected' : ''}>Non-binary</option>
+                                                    <option value="prefer-not" ${profile.gender === 'prefer-not' ? 'selected' : ''}>Prefer not to say</option>
+                                                </select>
+                                            </div>
+                                            <div class="md:col-span-2">
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileBio">Short Bio</label>
+                                                <textarea id="profileBio" name="profileBio" rows="3" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none resize-none" placeholder="Write a few lines about yourself...">${profile.bio || ''}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                                            <div class="md:col-span-1">
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileCountry">Country</label>
+                                                <select id="profileCountry" name="profileCountry" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">${buildCountryOptions(profile.country || appState.country)}</select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileCity">City</label>
+                                                <input type="text" id="profileCity" name="profileCity" value="${profile.city || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileAddress">Address</label>
+                                                <input type="text" id="profileAddress" name="profileAddress" value="${profile.address || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="Street, Apt, Zip">
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <header class="mb-4">
+                                            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                                <span class="mr-2">📞</span> Contact & Social Information
+                                            </h3>
+                                            <p class="text-sm text-gray-500">Make it easy for people to reach you.</p>
+                                        </header>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profilePhone">Phone Number</label>
+                                                <input type="tel" id="profilePhone" name="profilePhone" value="${profile.phone || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="+91 00000 00000">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileWebsite">Website</label>
+                                                <input type="url" id="profileWebsite" name="profileWebsite" value="${profile.website || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="https://">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileTwitter">Twitter</label>
+                                                <input type="url" id="profileTwitter" name="profileTwitter" value="${profile.twitter || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="https://twitter.com/">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileLinkedin">LinkedIn</label>
+                                                <input type="url" id="profileLinkedin" name="profileLinkedin" value="${profile.linkedin || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="https://linkedin.com/in/">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileFacebook">Facebook</label>
+                                                <input type="url" id="profileFacebook" name="profileFacebook" value="${profile.facebook || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="https://facebook.com/">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileInstagram">Instagram</label>
+                                                <input type="url" id="profileInstagram" name="profileInstagram" value="${profile.instagram || ''}" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="https://instagram.com/">
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <header class="mb-4">
+                                            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                                <span class="mr-2">⚙️</span> Settings & Preferences
+                                            </h3>
+                                            <p class="text-sm text-gray-500">Control how we communicate and show your data.</p>
+                                        </header>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileLanguage">Language</label>
+                                                <select id="profileLanguage" name="profileLanguage" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                                    <option value="en" ${profile.language === 'en' ? 'selected' : ''}>English</option>
+                                                    <option value="hi" ${profile.language === 'hi' ? 'selected' : ''}>Hindi</option>
+                                                    <option value="es" ${profile.language === 'es' ? 'selected' : ''}>Spanish</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileTimezone">Timezone</label>
+                                                <select id="profileTimezone" name="profileTimezone" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                                    <option value="Asia/Kolkata" ${profile.timezone === 'Asia/Kolkata' ? 'selected' : ''}>Asia/Kolkata (IST)</option>
+                                                    <option value="UTC" ${profile.timezone === 'UTC' ? 'selected' : ''}>UTC</option>
+                                                    <option value="America/New_York" ${profile.timezone === 'America/New_York' ? 'selected' : ''}>America/New_York (EST)</option>
+                                                    <option value="Europe/London" ${profile.timezone === 'Europe/London' ? 'selected' : ''}>Europe/London (GMT)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                            <div class="bg-gradient-to-br from-purple-50 to-indigo-50 p-5 rounded-2xl border border-purple-100">
+                                                <h4 class="font-semibold text-gray-800 mb-3">Notification Preferences</h4>
+                                                <label class="flex items-start space-x-3 text-sm text-gray-700 mb-2">
+                                                    <input type="checkbox" id="notifyNewsletter" name="notifyNewsletter" class="mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded" ${profile.notifications.newsletter ? 'checked' : ''}>
+                                                    <span>Weekly Newsletter</span>
+                                                </label>
+                                                <label class="flex items-start space-x-3 text-sm text-gray-700 mb-2">
+                                                    <input type="checkbox" id="notifyProduct" name="notifyProduct" class="mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded" ${profile.notifications.productUpdates ? 'checked' : ''}>
+                                                    <span>Product Updates & Feature Drops</span>
+                                                </label>
+                                                <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                                    <input type="checkbox" id="notifySecurity" name="notifySecurity" class="mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded" ${profile.notifications.securityAlerts ? 'checked' : ''}>
+                                                    <span>Security Alerts & Recommendations</span>
+                                                </label>
+                                            </div>
+                                            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 p-5 rounded-2xl border border-yellow-200">
+                                                <h4 class="font-semibold text-gray-800 mb-3">Privacy Settings</h4>
+                                                <label class="flex items-start space-x-3 text-sm text-gray-700 mb-2">
+                                                    <input type="checkbox" id="privacyProfile" name="privacyProfile" class="mt-1 h-4 w-4 text-yellow-600 border-gray-300 rounded" ${profile.privacy.profilePublic ? 'checked' : ''}>
+                                                    <span>Make my profile visible to everyone</span>
+                                                </label>
+                                                <label class="flex items-start space-x-3 text-sm text-gray-700 mb-2">
+                                                    <input type="checkbox" id="privacyEmail" name="privacyEmail" class="mt-1 h-4 w-4 text-yellow-600 border-gray-300 rounded" ${profile.privacy.showEmail ? 'checked' : ''}>
+                                                    <span>Show my email on my profile</span>
+                                                </label>
+                                                <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                                    <input type="checkbox" id="privacyActivity" name="privacyActivity" class="mt-1 h-4 w-4 text-yellow-600 border-gray-300 rounded" ${profile.privacy.showActivity ? 'checked' : ''}>
+                                                    <span>Share my activity publicly</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <div class="flex flex-col sm:flex-row sm:justify-end sm:items-center gap-3">
+                                        <button type="button" id="profileRemove" class="w-full sm:w-auto px-6 py-3 border-2 border-red-200 text-red-600 rounded-xl hover:text-red-700 hover:border-red-400 transition">Remove Profile Data</button>
+                                        <button type="button" id="profileCancel" class="w-full sm:w-auto px-6 py-3 border-2 border-gray-200 rounded-xl text-gray-600 hover:text-gray-800 hover:border-gray-400 transition">Cancel</button>
+                                        <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            `;
+
+            rootElement.innerHTML = profileHTML;
+            attachProfileListeners();
+        }
+
+        function attachProfileListeners() {
+            const profileForm = document.getElementById('profileForm');
+            if (!profileForm) return;
+
+            const avatarInput = document.getElementById('profileAvatar');
+            const avatarPreview = document.getElementById('avatarPreview');
+            const avatarInitial = document.getElementById('avatarInitial');
+            const removeAvatarBtn = document.getElementById('removeAvatarBtn');
+
+            const computeInitials = () => {
+                const firstValue = (document.getElementById('profileFirstName')?.value || '').trim();
+                const lastValue = (document.getElementById('profileLastName')?.value || '').trim();
+                const combined = `${firstValue.charAt(0)}${lastValue.charAt(0)}`.toUpperCase().trim();
+                if (combined) {
+                    return combined;
+                }
+                const fallback = (appState.fullName || 'User').replace(/[^A-Za-z]/g, '');
+                return (fallback.slice(0, 2) || 'ME').toUpperCase();
+            };
+
+            if (avatarInput) {
+                avatarInput.addEventListener('change', (event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        appState.profile.avatar = reader.result;
+                        if (avatarPreview) {
+                            avatarPreview.src = reader.result;
+                            avatarPreview.classList.remove('hidden');
+                        }
+                        if (avatarInitial) {
+                            avatarInitial.classList.add('hidden');
+                        }
+                        if (removeAvatarBtn) {
+                            removeAvatarBtn.classList.remove('hidden');
+                        }
+                        persistStateIfRemembered();
+                        showToast('Profile photo updated');
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            if (removeAvatarBtn) {
+                removeAvatarBtn.addEventListener('click', () => {
+                    appState.profile.avatar = '';
+                    if (avatarPreview) {
+                        avatarPreview.src = '';
+                        avatarPreview.classList.add('hidden');
+                    }
+                    if (avatarInitial) {
+                        avatarInitial.textContent = computeInitials();
+                        avatarInitial.classList.remove('hidden');
+                    }
+                    removeAvatarBtn.classList.add('hidden');
+                    persistStateIfRemembered();
+                    showToast('Profile photo removed');
+                });
+            }
+
+            const cancelButton = document.getElementById('profileCancel');
+            if (cancelButton) {
+                cancelButton.addEventListener('click', () => {
+                    renderProfilePage();
+                });
+            }
+
+            const removeButton = document.getElementById('profileRemove');
+            if (removeButton) {
+                removeButton.addEventListener('click', handleProfileRemoval);
+            }
+
+            profileForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(profileForm);
+
+                const newPassword = formData.get('profileNewPassword');
+                const confirmPassword = formData.get('profileConfirmPassword');
+
+                if (newPassword) {
+                    if (newPassword !== confirmPassword) {
+                        showToast('Passwords do not match', 'error');
+                        return;
+                    }
+                    appState.passwordHash = newPassword;
+                }
+
+                const updatedProfile = {
+                    firstName: (formData.get('profileFirstName') || '').trim(),
+                    lastName: (formData.get('profileLastName') || '').trim(),
+                    username: (formData.get('profileUsername') || '').trim(),
+                    dob: formData.get('profileDob') || '',
+                    gender: formData.get('profileGender') || '',
+                    bio: (formData.get('profileBio') || '').trim(),
+                    country: formData.get('profileCountry') || appState.country,
+                    city: (formData.get('profileCity') || '').trim(),
+                    address: (formData.get('profileAddress') || '').trim(),
+                    phone: (formData.get('profilePhone') || '').trim(),
+                    website: (formData.get('profileWebsite') || '').trim(),
+                    twitter: (formData.get('profileTwitter') || '').trim(),
+                    linkedin: (formData.get('profileLinkedin') || '').trim(),
+                    facebook: (formData.get('profileFacebook') || '').trim(),
+                    instagram: (formData.get('profileInstagram') || '').trim(),
+                    language: formData.get('profileLanguage') || 'en',
+                    timezone: formData.get('profileTimezone') || 'UTC'
+                };
+
+                const notifications = {
+                    newsletter: !!profileForm.querySelector('#notifyNewsletter')?.checked,
+                    productUpdates: !!profileForm.querySelector('#notifyProduct')?.checked,
+                    securityAlerts: !!profileForm.querySelector('#notifySecurity')?.checked
+                };
+
+                const privacy = {
+                    profilePublic: !!profileForm.querySelector('#privacyProfile')?.checked,
+                    showEmail: !!profileForm.querySelector('#privacyEmail')?.checked,
+                    showActivity: !!profileForm.querySelector('#privacyActivity')?.checked
+                };
+
+                appState.profile = {
+                    ...appState.profile,
+                    ...updatedProfile,
+                    notifications,
+                    privacy
+                };
+
+                appState.fullName = [appState.profile.firstName, appState.profile.lastName].filter(Boolean).join(' ') || appState.fullName;
+                appState.email = (formData.get('profileEmail') || appState.email).trim();
+                appState.country = appState.profile.country || appState.country;
+
+                updateDashboardCounts();
+
+                if (appState.rememberMe) {
+                    saveCredentials();
+                }
+
+                showToast('Profile updated successfully!');
+                renderProfilePage();
+            });
+        }
+
+        function attachSettingsListeners() {
+            const themeOptions = document.querySelectorAll('input[name="themeOption"]');
+            themeOptions.forEach(option => {
+                option.addEventListener('change', (event) => {
+                    appState.settings.appearance.theme = event.target.value;
+                    persistStateIfRemembered();
+                    showToast(`Theme set to ${event.target.value}.`);
+                    applyGlobalPreferences();
+                });
+            });
+
+            const fontSizeSelect = document.getElementById('fontSizeSelect');
+            if (fontSizeSelect) {
+                fontSizeSelect.addEventListener('change', (event) => {
+                    appState.settings.appearance.fontSize = event.target.value;
+                    persistStateIfRemembered();
+                    showToast('Font size updated.');
+                    applyGlobalPreferences();
+                });
+            }
+
+            const colorblindSelect = document.getElementById('colorblindSelect');
+            if (colorblindSelect) {
+                colorblindSelect.addEventListener('change', (event) => {
+                    appState.settings.appearance.colorblindFilter = event.target.value;
+                    persistStateIfRemembered();
+                    showToast('Color filter applied.');
+                    applyGlobalPreferences();
+                });
+            }
+
+            const highContrastToggle = document.getElementById('highContrastToggle');
+            if (highContrastToggle) {
+                highContrastToggle.addEventListener('change', (event) => {
+                    appState.settings.appearance.highContrast = event.target.checked;
+                    persistStateIfRemembered();
+                    applyGlobalPreferences();
+                });
+            }
+
+            const reduceMotionToggle = document.getElementById('reduceMotionToggle');
+            if (reduceMotionToggle) {
+                reduceMotionToggle.addEventListener('change', (event) => {
+                    appState.settings.appearance.reduceMotion = event.target.checked;
+                    persistStateIfRemembered();
+                    applyGlobalPreferences();
+                });
+            }
+
+            const emailForm = document.getElementById('emailChangeForm');
+            if (emailForm) {
+                emailForm.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    const newEmail = document.getElementById('accountEmail')?.value.trim();
+                    if (newEmail && newEmail !== appState.email) {
+                        appState.email = newEmail;
+                        persistStateIfRemembered();
+                        showToast('Email updated successfully.');
+                    } else {
+                        showToast('Please enter a new email address.', 'error');
+                    }
+                });
+            }
+
+            const passwordForm = document.getElementById('passwordChangeForm');
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    const currentPassword = document.getElementById('currentPassword')?.value || '';
+                    const newPassword = document.getElementById('newPassword')?.value || '';
+                    const confirmPassword = document.getElementById('confirmNewPassword')?.value || '';
+
+                    if (newPassword.length < 8) {
+                        showToast('New password must be at least 8 characters.', 'error');
+                        return;
+                    }
+
+                    if (newPassword !== confirmPassword) {
+                        showToast('Passwords do not match.', 'error');
+                        return;
+                    }
+
+                    if (appState.passwordHash && currentPassword !== appState.passwordHash) {
+                        showToast('Current password is incorrect.', 'error');
+                        return;
+                    }
+
+                    appState.passwordHash = newPassword;
+                    passwordForm.reset();
+                    persistStateIfRemembered();
+                    showToast('Password updated successfully.');
+                });
+            }
+
+            const twoFactorToggle = document.getElementById('twoFactorToggle');
+            if (twoFactorToggle) {
+                twoFactorToggle.addEventListener('change', (event) => {
+                    appState.settings.account.twoFactorEnabled = event.target.checked;
+                    persistStateIfRemembered();
+                    showToast(event.target.checked ? '2FA enabled.' : '2FA disabled.');
+                });
+            }
+
+            const logoutOthersBtn = document.getElementById('logoutOtherSessionsBtn');
+            if (logoutOthersBtn) {
+                logoutOthersBtn.addEventListener('click', logoutOtherSessions);
+            }
+
+            document.querySelectorAll('[data-session-id]').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const sessionId = event.currentTarget.getAttribute('data-session-id');
+                    if (sessionId) {
+                        removeSessionById(sessionId);
+                    }
+                });
+            });
+
+            const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+            if (deleteAccountBtn) {
+                deleteAccountBtn.addEventListener('click', handleAccountDeletion);
+            }
+
+            const notificationBindings = [
+                { id: 'pushMessagesToggle', path: ['notifications', 'push', 'newMessages'] },
+                { id: 'pushMentionsToggle', path: ['notifications', 'push', 'mentions'] },
+                { id: 'pushLikesToggle', path: ['notifications', 'push', 'likesComments'] },
+                { id: 'emailNewsletterToggle', path: ['notifications', 'email', 'newsletter'] },
+                { id: 'emailProductToggle', path: ['notifications', 'email', 'productUpdates'] },
+                { id: 'inAppSoundsToggle', path: ['notifications', 'inAppSounds'] }
+            ];
+
+            notificationBindings.forEach(({ id, path }) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', (event) => {
+                        let target = appState.settings;
+                        for (let i = 0; i < path.length - 1; i++) {
+                            target = target[path[i]];
+                        }
+                        target[path[path.length - 1]] = event.target.checked;
+                        if (path[1] === 'email') {
+                            const field = path[path.length - 1];
+                            if (field in appState.profile.notifications) {
+                                appState.profile.notifications[field] = event.target.checked;
+                            }
+                        }
+                        persistStateIfRemembered();
+                    });
+                }
+            });
+
+            const emailSecurityToggle = document.getElementById('emailSecurityToggle');
+            if (emailSecurityToggle) {
+                emailSecurityToggle.addEventListener('change', (event) => {
+                    if (!event.target.checked) {
+                        event.target.checked = true;
+                        showToast('Security alerts are required to stay on.', 'error');
+                        return;
+                    }
+                    appState.settings.notifications.email.securityAlerts = true;
+                    appState.profile.notifications.securityAlerts = true;
+                    persistStateIfRemembered();
+                });
+            }
+
+            const profileVisibilitySelect = document.getElementById('profileVisibilitySelect');
+            if (profileVisibilitySelect) {
+                profileVisibilitySelect.addEventListener('change', (event) => {
+                    const value = event.target.value;
+                    appState.settings.privacy.profileVisibility = value;
+                    appState.profile.privacy.profilePublic = value === 'everyone';
+                    appState.profile.privacy.showEmail = value === 'everyone';
+                    appState.profile.privacy.showActivity = value !== 'private';
+                    persistStateIfRemembered();
+                    showToast('Privacy preferences updated.');
+                });
+            }
+
+            const dataExportBtn = document.getElementById('dataExportBtn');
+            if (dataExportBtn) {
+                dataExportBtn.addEventListener('click', handleDataExport);
+            }
+
+            const dataSharingPartnersToggle = document.getElementById('dataSharingPartnersToggle');
+            if (dataSharingPartnersToggle) {
+                dataSharingPartnersToggle.addEventListener('change', (event) => {
+                    appState.settings.privacy.dataSharing.thirdPartyPartners = event.target.checked;
+                    persistStateIfRemembered();
+                });
+            }
+
+            const dataSharingAnalyticsToggle = document.getElementById('dataSharingAnalyticsToggle');
+            if (dataSharingAnalyticsToggle) {
+                dataSharingAnalyticsToggle.addEventListener('change', (event) => {
+                    appState.settings.privacy.dataSharing.analytics = event.target.checked;
+                    persistStateIfRemembered();
+                });
+            }
+
+            document.querySelectorAll('[data-unblock-user]').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const username = event.currentTarget.getAttribute('data-unblock-user');
+                    if (username) {
+                        handleBlockedUserRemoval(username);
+                    }
+                });
+            });
+
+            const languageSelect = document.getElementById('languageSelect');
+            if (languageSelect) {
+                languageSelect.addEventListener('change', (event) => {
+                    appState.settings.application.language = event.target.value;
+                    appState.profile.language = event.target.value;
+                    persistStateIfRemembered();
+                    showToast('Language preference saved.');
+                });
+            }
+
+            const timezoneSelect = document.getElementById('timezoneSelect');
+            if (timezoneSelect) {
+                timezoneSelect.addEventListener('change', (event) => {
+                    appState.settings.application.timezone = event.target.value;
+                    appState.settings.application.autoDetectTimezone = false;
+                    appState.profile.timezone = event.target.value;
+                    persistStateIfRemembered();
+                    showToast('Timezone updated.');
+                });
+            }
+
+            const detectTimezoneBtn = document.getElementById('detectTimezoneBtn');
+            if (detectTimezoneBtn) {
+                detectTimezoneBtn.addEventListener('click', handleAutoDetectTimezone);
+            }
+
+            document.querySelectorAll('[data-connected-account]').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const provider = event.currentTarget.getAttribute('data-connected-account');
+                    if (provider) {
+                        handleConnectedAccountToggle(provider);
+                    }
+                });
+            });
+
+            const defaultViewSelect = document.getElementById('defaultViewSelect');
+            if (defaultViewSelect) {
+                defaultViewSelect.addEventListener('change', (event) => {
+                    appState.settings.application.defaultView = event.target.value;
+                    persistStateIfRemembered();
+                    showToast('Default view updated.');
+                });
+            }
+
+            const helpCenterBtn = document.getElementById('helpCenterBtn');
+            if (helpCenterBtn) {
+                helpCenterBtn.addEventListener('click', () => showToast('Opening help center...'));
+            }
+
+            const contactSupportBtn = document.getElementById('contactSupportBtn');
+            if (contactSupportBtn) {
+                contactSupportBtn.addEventListener('click', () => showToast('Support team will reach out shortly.'));
+            }
+
+            const reportBugBtn = document.getElementById('reportBugBtn');
+            if (reportBugBtn) {
+                reportBugBtn.addEventListener('click', () => showToast('Bug report form coming right up.'));
+            }
+        }
+
+        function renderSettingsPage() {
+            rootElement.classList.remove('justify-center');
+            rootElement.classList.add('justify-start', 'items-start', 'md:pt-10');
+
+            const s = appState.settings;
+            const theme = s.appearance.theme;
+            const sessionsHTML = s.account.activeSessions.length
+                ? s.account.activeSessions.map(session => `
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white border border-blue-100 rounded-xl shadow-sm">
+                            <div>
+                                <p class="font-semibold text-gray-800">${session.device}</p>
+                                <p class="text-xs text-gray-500">${session.location} • Last active ${session.lastActive}</p>
+                            </div>
+                            <div class="flex items-center gap-3 mt-3 sm:mt-0">
+                                ${session.isCurrent ? '<span class="px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">Current device</span>' : ''}
+                                ${session.isCurrent ? '' : `<button data-session-id="${session.id}" class="px-4 py-2 text-sm font-semibold text-red-600 border border-red-200 rounded-xl hover:text-red-700 hover:border-red-400 transition">Remove</button>`}
+                            </div>
+                        </div>
+                    `).join('')
+                : '<p class="text-sm text-gray-500">No other active sessions.</p>';
+
+            const blockedUsersHTML = s.privacy.blockedUsers.length
+                ? s.privacy.blockedUsers.map(user => `
+                        <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl">
+                            <span class="text-sm font-medium text-gray-700">${user}</span>
+                            <button data-unblock-user="${user}" class="px-3 py-1 text-xs font-semibold text-purple-600 border border-purple-200 rounded-lg hover:text-purple-700 hover:border-purple-400 transition">Unblock</button>
+                        </div>
+                    `).join('')
+                : '<p class="text-sm text-gray-500">You have not blocked anyone yet.</p>';
+
+            const connectedAccountsHTML = Object.entries(s.application.connectedAccounts).map(([provider, connected]) => {
+                const labelMap = { google: 'Google', twitter: 'Twitter', github: 'GitHub' };
+                const label = labelMap[provider] || provider;
+                return `
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white border border-gray-100 rounded-xl">
+                        <div>
+                            <p class="font-semibold text-gray-800">${label}</p>
+                            <p class="text-xs text-gray-500">${connected ? 'Connected' : 'Not connected'}</p>
+                        </div>
+                        <button data-connected-account="${provider}" class="mt-3 sm:mt-0 px-4 py-2 text-sm font-semibold ${connected ? 'text-red-600 border border-red-200 hover:text-red-700 hover:border-red-400' : 'text-purple-600 border border-purple-200 hover:text-purple-700 hover:border-purple-400'} rounded-xl transition">${connected ? 'Disconnect' : 'Connect'}</button>
+                    </div>
+                `;
+            }).join('');
+
+            const timezoneOptions = ['Asia/Kolkata', 'UTC', 'America/New_York', 'Europe/London', 'Asia/Tokyo', 'Australia/Sydney'];
+            if (s.application.timezone && !timezoneOptions.includes(s.application.timezone)) {
+                timezoneOptions.unshift(s.application.timezone);
+            }
+            const timezoneHTML = timezoneOptions.map(tz => `<option value="${tz}" ${s.application.timezone === tz ? 'selected' : ''}>${tz}</option>`).join('');
+
+            const settingsHTML = `
+                <div class="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row dashboard-container glass-effect card-entrance">
+                    ${getSidebarHTML('#settings')}
+                    <main class="flex-1 p-6 md:p-10 overflow-y-auto bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+                        <div class="space-y-8">
+
+                            <section class="bg-white border-2 border-purple-100 rounded-2xl shadow-xl p-8">
+                                <header class="mb-6">
+                                    <h2 class="text-2xl font-extrabold text-gray-800 flex items-center"><span class="mr-2">🎨</span>Appearance & Display</h2>
+                                    <p class="text-sm text-gray-500">Tune the interface so it matches your vibe.</p>
+                                </header>
+                                <div class="space-y-6">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-700 mb-3">Theme</p>
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                            <label class="border rounded-xl p-4 flex items-center justify-between cursor-pointer ${theme === 'light' ? 'border-purple-400 shadow' : 'border-gray-200'}">
+                                                <span class="font-medium text-gray-700">Light</span>
+                                                <input type="radio" name="themeOption" id="themeLight" value="light" ${theme === 'light' ? 'checked' : ''}>
+                                            </label>
+                                            <label class="border rounded-xl p-4 flex items-center justify-between cursor-pointer ${theme === 'dark' ? 'border-purple-400 shadow' : 'border-gray-200'}">
+                                                <span class="font-medium text-gray-700">Dark</span>
+                                                <input type="radio" name="themeOption" id="themeDark" value="dark" ${theme === 'dark' ? 'checked' : ''}>
+                                            </label>
+                                            <label class="border rounded-xl p-4 flex items-center justify-between cursor-pointer ${theme === 'system' ? 'border-purple-400 shadow' : 'border-gray-200'}">
+                                                <span class="font-medium text-gray-700">System</span>
+                                                <input type="radio" name="themeOption" id="themeSystem" value="system" ${theme === 'system' ? 'checked' : ''}>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="fontSizeSelect" class="block text-sm font-semibold text-gray-700 mb-2">Font Size</label>
+                                            <select id="fontSizeSelect" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                                <option value="small" ${s.appearance.fontSize === 'small' ? 'selected' : ''}>Small</option>
+                                                <option value="medium" ${s.appearance.fontSize === 'medium' ? 'selected' : ''}>Medium</option>
+                                                <option value="large" ${s.appearance.fontSize === 'large' ? 'selected' : ''}>Large</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="colorblindSelect" class="block text-sm font-semibold text-gray-700 mb-2">Colorblind Filter</label>
+                                            <select id="colorblindSelect" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                                <option value="none" ${s.appearance.colorblindFilter === 'none' ? 'selected' : ''}>None</option>
+                                                <option value="protanopia" ${s.appearance.colorblindFilter === 'protanopia' ? 'selected' : ''}>Protanopia</option>
+                                                <option value="deuteranopia" ${s.appearance.colorblindFilter === 'deuteranopia' ? 'selected' : ''}>Deuteranopia</option>
+                                                <option value="tritanopia" ${s.appearance.colorblindFilter === 'tritanopia' ? 'selected' : ''}>Tritanopia</option>
+                                                <option value="grayscale" ${s.appearance.colorblindFilter === 'grayscale' ? 'selected' : ''}>Grayscale</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                            <input type="checkbox" id="highContrastToggle" class="mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded" ${s.appearance.highContrast ? 'checked' : ''}>
+                                            <span>Enable high contrast mode</span>
+                                        </label>
+                                        <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                            <input type="checkbox" id="reduceMotionToggle" class="mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded" ${s.appearance.reduceMotion ? 'checked' : ''}>
+                                            <span>Reduce motion & animations</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="bg-white border-2 border-green-100 rounded-2xl shadow-xl p-8">
+                                <header class="mb-6">
+                                    <h2 class="text-2xl font-extrabold text-gray-800 flex items-center"><span class="mr-2">🔐</span>Account & Security</h2>
+                                    <p class="text-sm text-gray-500">Keep your account up to date and secure.</p>
+                                </header>
+                                <div class="space-y-6">
+                                    <form id="emailChangeForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div class="md:col-span-2">
+                                            <label for="accountEmail" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                                            <input type="email" id="accountEmail" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" value="${appState.email}" required>
+                                        </div>
+                                        <div class="flex items-end">
+                                            <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow hover:shadow-md transition">Update Email</button>
+                                        </div>
+                                    </form>
+                                    <form id="passwordChangeForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div>
+                                            <label for="currentPassword" class="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
+                                            <input type="password" id="currentPassword" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="Required if set">
+                                        </div>
+                                        <div>
+                                            <label for="newPassword" class="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
+                                            <input type="password" id="newPassword" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="Min 8 characters">
+                                        </div>
+                                        <div>
+                                            <label for="confirmNewPassword" class="block text-sm font-semibold text-gray-700 mb-2">Confirm New Password</label>
+                                            <input type="password" id="confirmNewPassword" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none" placeholder="Re-enter new password">
+                                        </div>
+                                        <div class="flex items-end">
+                                            <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow hover:shadow-md transition">Update Password</button>
+                                        </div>
+                                    </form>
+                                    <div class="flex items-center space-x-3">
+                                        <input type="checkbox" id="twoFactorToggle" class="h-4 w-4 text-green-600 border-gray-300 rounded" ${s.account.twoFactorEnabled ? 'checked' : ''}>
+                                        <label for="twoFactorToggle" class="text-sm text-gray-700">Enable two-factor authentication</label>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Active Sessions</h3>
+                                            <button type="button" id="logoutOtherSessionsBtn" class="px-4 py-2 text-xs font-semibold text-red-600 border border-red-200 rounded-lg hover:text-red-700 hover:border-red-400 transition">Log out other devices</button>
+                                        </div>
+                                        <div class="space-y-3">${sessionsHTML}</div>
+                                    </div>
+                                    <button type="button" id="deleteAccountBtn" class="w-full px-4 py-3 border-2 border-red-200 text-red-600 font-semibold rounded-xl hover:border-red-400 hover:text-red-700 transition">Delete Account & Data</button>
+                                </div>
+                            </section>
+
+                            <section class="bg-white border-2 border-yellow-100 rounded-2xl shadow-xl p-8">
+                                <header class="mb-6">
+                                    <h2 class="text-2xl font-extrabold text-gray-800 flex items-center"><span class="mr-2">🔔</span>Notification Preferences</h2>
+                                    <p class="text-sm text-gray-500">Choose how you get notified.</p>
+                                </header>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-3">
+                                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Push Notifications</h3>
+                                        <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                            <input type="checkbox" id="pushMessagesToggle" class="mt-1 h-4 w-4 text-yellow-500 border-gray-300 rounded" ${s.notifications.push.newMessages ? 'checked' : ''}>
+                                            <span>New messages</span>
+                                        </label>
+                                        <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                            <input type="checkbox" id="pushMentionsToggle" class="mt-1 h-4 w-4 text-yellow-500 border-gray-300 rounded" ${s.notifications.push.mentions ? 'checked' : ''}>
+                                            <span>Mentions</span>
+                                        </label>
+                                        <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                            <input type="checkbox" id="pushLikesToggle" class="mt-1 h-4 w-4 text-yellow-500 border-gray-300 rounded" ${s.notifications.push.likesComments ? 'checked' : ''}>
+                                            <span>Likes & comments</span>
+                                        </label>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Email Notifications</h3>
+                                        <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                            <input type="checkbox" id="emailNewsletterToggle" class="mt-1 h-4 w-4 text-yellow-500 border-gray-300 rounded" ${s.notifications.email.newsletter ? 'checked' : ''}>
+                                            <span>Weekly newsletter</span>
+                                        </label>
+                                        <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                            <input type="checkbox" id="emailProductToggle" class="mt-1 h-4 w-4 text-yellow-500 border-gray-300 rounded" ${s.notifications.email.productUpdates ? 'checked' : ''}>
+                                            <span>Product updates</span>
+                                        </label>
+                                        <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                            <input type="checkbox" id="emailSecurityToggle" class="mt-1 h-4 w-4 text-yellow-500 border-gray-300 rounded" ${s.notifications.email.securityAlerts ? 'checked' : ''}>
+                                            <span>Security alerts</span>
+                                        </label>
+                                        <label class="flex items-start space-x-3 text-sm text-gray-700 pt-2 border-t border-yellow-200 mt-3">
+                                            <input type="checkbox" id="inAppSoundsToggle" class="mt-1 h-4 w-4 text-yellow-500 border-gray-300 rounded" ${s.notifications.inAppSounds ? 'checked' : ''}>
+                                            <span>Play in-app notification sounds</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="bg-white border-2 border-blue-100 rounded-2xl shadow-xl p-8">
+                                <header class="mb-6">
+                                    <h2 class="text-2xl font-extrabold text-gray-800 flex items-center"><span class="mr-2">🤫</span>Privacy & Data</h2>
+                                    <p class="text-sm text-gray-500">You’re in control of what other people see.</p>
+                                </header>
+                                <div class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label for="profileVisibilitySelect" class="block text-sm font-semibold text-gray-700 mb-2">Profile visibility</label>
+                                            <select id="profileVisibilitySelect" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                                <option value="everyone" ${s.privacy.profileVisibility === 'everyone' ? 'selected' : ''}>Everyone</option>
+                                                <option value="friends" ${s.privacy.profileVisibility === 'friends' ? 'selected' : ''}>Friends only</option>
+                                                <option value="private" ${s.privacy.profileVisibility === 'private' ? 'selected' : ''}>Only me</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Data export</label>
+                                            <button type="button" id="dataExportBtn" class="w-full px-4 py-3 border border-blue-200 text-blue-600 font-semibold rounded-xl hover:border-blue-400 hover:text-blue-700 transition">Download my data</button>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Data sharing</label>
+                                            <div class="space-y-2">
+                                                <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                                    <input type="checkbox" id="dataSharingPartnersToggle" class="mt-1 h-4 w-4 text-blue-500 border-gray-300 rounded" ${s.privacy.dataSharing.thirdPartyPartners ? 'checked' : ''}>
+                                                    <span>Allow third-party partners</span>
+                                                </label>
+                                                <label class="flex items-start space-x-3 text-sm text-gray-700">
+                                                    <input type="checkbox" id="dataSharingAnalyticsToggle" class="mt-1 h-4 w-4 text-blue-500 border-gray-300 rounded" ${s.privacy.dataSharing.analytics ? 'checked' : ''}>
+                                                    <span>Share anonymized analytics</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Blocked users</h3>
+                                        <div class="space-y-2">${blockedUsersHTML}</div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="bg-white border-2 border-indigo-100 rounded-2xl shadow-xl p-8">
+                                <header class="mb-6">
+                                    <h2 class="text-2xl font-extrabold text-gray-800 flex items-center"><span class="mr-2">⚙️</span>Application Settings</h2>
+                                    <p class="text-sm text-gray-500">Customize how the product behaves for you.</p>
+                                </header>
+                                <div class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label for="languageSelect" class="block text-sm font-semibold text-gray-700 mb-2">Language</label>
+                                            <select id="languageSelect" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                                <option value="en" ${s.application.language === 'en' ? 'selected' : ''}>English</option>
+                                                <option value="es" ${s.application.language === 'es' ? 'selected' : ''}>Spanish</option>
+                                                <option value="fr" ${s.application.language === 'fr' ? 'selected' : ''}>French</option>
+                                                <option value="hi" ${s.application.language === 'hi' ? 'selected' : ''}>Hindi</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="timezoneSelect" class="block text-sm font-semibold text-gray-700 mb-2">Timezone</label>
+                                            <select id="timezoneSelect" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">${timezoneHTML}</select>
+                                        </div>
+                                        <div class="flex flex-col justify-end">
+                                            <button type="button" id="detectTimezoneBtn" class="px-4 py-3 border border-indigo-200 text-indigo-600 font-semibold rounded-xl hover:border-indigo-400 hover:text-indigo-700 transition">Sync with device</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Connected accounts</h3>
+                                        <div class="space-y-3">${connectedAccountsHTML}</div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div class="md:col-span-2">
+                                            <label for="defaultViewSelect" class="block text-sm font-semibold text-gray-700 mb-2">Default view after login</label>
+                                            <select id="defaultViewSelect" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">
+                                                <option value="#dashboard" ${s.application.defaultView === '#dashboard' ? 'selected' : ''}>Dashboard</option>
+                                                <option value="#profile" ${s.application.defaultView === '#profile' ? 'selected' : ''}>Profile</option>
+                                                <option value="#settings" ${s.application.defaultView === '#settings' ? 'selected' : ''}>Settings</option>
+                                                <option value="#support" ${s.application.defaultView === '#support' ? 'selected' : ''}>Support</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex items-center mt-2">
+                                            <p class="text-xs text-gray-500">Pick where you land after signing in.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="bg-white border-2 border-teal-100 rounded-2xl shadow-xl p-8">
+                                <header class="mb-6">
+                                    <h2 class="text-2xl font-extrabold text-gray-800 flex items-center"><span class="mr-2">❓</span>Help & About</h2>
+                                    <p class="text-sm text-gray-500">Quick answers and legal bits.</p>
+                                </header>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <button type="button" id="helpCenterBtn" class="px-4 py-3 border border-teal-200 text-teal-600 font-semibold rounded-xl hover:border-teal-400 hover:text-teal-700 transition text-left">Help Center / FAQ</button>
+                                    <button type="button" id="contactSupportBtn" class="px-4 py-3 border border-teal-200 text-teal-600 font-semibold rounded-xl hover:border-teal-400 hover:text-teal-700 transition text-left">Contact Support</button>
+                                    <button type="button" id="reportBugBtn" class="px-4 py-3 border border-teal-200 text-teal-600 font-semibold rounded-xl hover:border-teal-400 hover:text-teal-700 transition text-left">Report a Bug</button>
+                                    <div class="px-4 py-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-xl">
+                                        <p class="text-sm font-semibold text-gray-700">About this app</p>
+                                        <p class="text-xs text-gray-500 mt-2">Version ${s.help.appVersion}</p>
+                                        <div class="flex gap-3 text-xs text-purple-600 mt-3">
+                                            <a href="#" class="hover:underline">Terms of Service</a>
+                                            <a href="#" class="hover:underline">Privacy Policy</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                        </div>
+                    </main>
+                </div>
+            `;
+
+            rootElement.innerHTML = settingsHTML;
+            attachSettingsListeners();
+        }
+
+        function renderSupportPage() {
+            rootElement.classList.remove('justify-center');
+            rootElement.classList.add('justify-start', 'items-start', 'md:pt-10');
+
+            const supportHTML = `
+                <div class="w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row dashboard-container glass-effect card-entrance">
+                    ${getSidebarHTML('#support')}
+                    <main class="flex-1 p-6 md:p-10 bg-gradient-to-br from-gray-50 via-emerald-50 to-teal-50">
+                        <section class="bg-white border-2 border-emerald-100 rounded-2xl shadow-xl p-10">
+                            <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Need a hand?</h2>
+                            <p class="text-gray-600 leading-relaxed mb-6">Drop us a message anytime and our crew will orbit back within 24 hours. We are working on contextual help and live chat for the next release.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 p-6 rounded-2xl">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Raise a support ticket</h3>
+                                    <p class="text-sm text-gray-600 mb-4">support@moonhq.com</p>
+                                    <p class="text-xs text-gray-500">Avg response time: under 12 hours</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-indigo-100 to-purple-100 p-6 rounded-2xl">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Join the community</h3>
+                                    <p class="text-sm text-gray-600 mb-4">discord.gg/moonorbit</p>
+                                    <p class="text-xs text-gray-500">Daily check-ins from our product folks</p>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            `;
+
+            rootElement.innerHTML = supportHTML;
+        }
+
+        // ===== EVENT HANDLERS =====
+        
+        // Logout handler
+        function handleLogout() {
+            appState.isRegistered = false;
+            appState.passwordHash = null;
+            clearCredentials(); // Clear saved credentials on logout
+            window.location.hash = ''; 
+            routeApp();
+        }
+        
+        // Show projects modal
+        function showProjectsModal() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden card-entrance">
+                    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white flex justify-between items-center">
+                        <h2 class="text-2xl font-bold">All Projects (${appState.projectsList.length})</h2>
+                        <button onclick="this.closest('.fixed').remove()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+                        <div class="space-y-4">
+                            ${appState.projectsList.map(project => `
+                                <div class="bg-gradient-to-r from-gray-50 to-blue-50 p-5 rounded-xl border-2 border-blue-100 hover:shadow-lg transition-all">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h3 class="text-lg font-bold text-gray-800">${project.name}</h3>
+                                            <p class="text-sm text-gray-600">Due: ${project.dueDate}</p>
+                                        </div>
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                                            project.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                            project.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                                            'bg-yellow-100 text-yellow-800'
+                                        }">${project.status}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: ${project.progress}%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-600 mt-2 text-right">${project.progress}% Complete</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Show tasks modal
+        function showTasksModal() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden card-entrance">
+                    <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white flex justify-between items-center">
+                        <h2 class="text-2xl font-bold">Pending Tasks (${appState.tasksList.length})</h2>
+                        <button onclick="this.closest('.fixed').remove()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+                        <div class="space-y-3">
+                            ${appState.tasksList.map(task => `
+                                <div class="bg-gradient-to-r from-gray-50 to-green-50 p-4 rounded-xl border-2 border-green-100 hover:shadow-lg transition-all">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <h3 class="text-base font-bold text-gray-800">${task.title}</h3>
+                                            <div class="flex items-center gap-3 mt-2">
+                                                <span class="px-2 py-1 rounded-full text-xs font-semibold ${
+                                                    task.priority === 'High' ? 'bg-red-100 text-red-800' :
+                                                    task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                                    'bg-gray-100 text-gray-800'
+                                                }">
+                                                    ${task.priority} Priority
+                                                </span>
+                                                <span class="text-xs text-gray-600">
+                                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                    </svg>
+                                                    ${task.assignee}
+                                                </span>
+                                                <span class="px-2 py-1 rounded-full text-xs font-semibold ${
+                                                    task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                                                    'bg-gray-100 text-gray-800'
+                                                }">
+                                                    ${task.status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Handle alert clicks
+        function handleAlertClick(alertId, alertType) {
+            const alert = appState.alertsList.find(a => a.id === alertId);
+            if (!alert || alert.resolved) return;
+            
+            if (alertType === 'email') {
+                // Show email verification modal
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+                modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+                
+                modal.innerHTML = `
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 card-entrance text-center">
+                        <div class="mx-auto w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-3">Verify Your Email</h2>
+                        <p class="text-gray-600 mb-6">We've sent a verification link to <strong>${appState.email}</strong></p>
+                        <button onclick="resolveAlert(${alertId}); this.closest('.fixed').remove();" class="w-full py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all">
+                            Mark as Verified
+                        </button>
+                        <button onclick="this.closest('.fixed').remove()" class="w-full mt-3 py-2 px-6 text-gray-600 hover:text-gray-800 font-medium">
+                            Cancel
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+            } else if (alertType === 'profile') {
+                // Show profile picture upload modal
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+                modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+                
+                modal.innerHTML = `
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 card-entrance text-center">
+                        <div class="mx-auto w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-3">Update Profile Picture</h2>
+                        <p class="text-gray-600 mb-6">Add a profile picture to personalize your account</p>
+                        <button onclick="resolveAlert(${alertId}); this.closest('.fixed').remove();" class="w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all">
+                            Upload Picture
+                        </button>
+                        <button onclick="this.closest('.fixed').remove()" class="w-full mt-3 py-2 px-6 text-gray-600 hover:text-gray-800 font-medium">
+                            Skip for Now
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+            } else if (alertType === 'policy') {
+                // Show privacy policy modal
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+                modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+                
+                modal.innerHTML = `
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden card-entrance">
+                        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
+                            <h2 class="text-2xl font-bold">Privacy Policy Update</h2>
+                        </div>
+                        <div class="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+                            <p class="text-gray-700 mb-4">We've updated our privacy policy to better protect your data and provide more transparency.</p>
+                            <div class="bg-gray-50 p-4 rounded-xl mb-4">
+                                <h3 class="font-bold text-gray-800 mb-2">Key Changes:</h3>
+                                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                                    <li>Enhanced data encryption standards</li>
+                                    <li>Improved cookie management options</li>
+                                    <li>Clearer data retention policies</li>
+                                    <li>Updated third-party sharing guidelines</li>
+                                </ul>
+                            </div>
+                            <p class="text-sm text-gray-600">Last updated: November 1, 2025</p>
+                        </div>
+                        <div class="p-6 border-t flex gap-3">
+                            <button onclick="resolveAlert(${alertId}); this.closest('.fixed').remove();" class="flex-1 py-3 px-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all">
+                                I Agree
+                            </button>
+                            <button onclick="this.closest('.fixed').remove()" class="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+            }
+        }
+        
+        // Resolve an alert
+        function resolveAlert(alertId) {
+            const alert = appState.alertsList.find(a => a.id === alertId);
+            if (alert) {
+                alert.resolved = true;
+                appState.notifications = appState.alertsList.filter(a => !a.resolved).length;
+                if (appState.rememberMe) {
+                    saveCredentials();
+                }
+                showToast('Alert resolved. Nice work!');
+                // Refresh the dashboard to show updated alerts
+                renderDashboard();
+            }
+        }
+
+        // Router - handles navigation
+        function routeApp() {
+            const hash = window.location.hash;
+
+            if (!hash && appState.isRegistered) {
+                const targetRoute = appState.settings?.application?.defaultView || '#dashboard';
+                window.location.hash = targetRoute;
+                return;
+            }
+            const protectedRoutes = ['#dashboard', '#profile', '#settings', '#support'];
+
+            if (protectedRoutes.includes(hash)) {
+                if (!appState.isRegistered) {
+                    window.location.hash = '#login';
+                    return;
+                }
+
+                switch (hash) {
+                    case '#profile':
+                        renderProfilePage();
+                        return;
+                    case '#settings':
+                        renderSettingsPage();
+                        return;
+                    case '#support':
+                        renderSupportPage();
+                        return;
+                    default:
+                        renderDashboard();
+                        return;
+                }
+            }
+            
+            // Login page
+            if (hash === '#login') {
+                renderLoginPage();
+                return;
+            }
+
+            // Success page
+            if (hash === '#success' && appState.isRegistered) {
+                renderSuccessPage();
+                return;
+            }
+
+            // Default to registration form
+            renderForm(appState);
+        }
+
+        // Password validation
+        function validatePasswords(passwordEl, confirmPasswordEl, errorEl, submitButton) {
+            const passwordValue = passwordEl.value;
+            const confirmValue = confirmPasswordEl.value;
+            
+            const shouldValidate = passwordValue !== "" || confirmValue !== "";
+            const isMatch = passwordValue === confirmValue;
+
+            if (!isMatch && shouldValidate) {
+                errorEl.textContent = "Oops! Passwords do not match.";
+                errorEl.classList.remove('hidden');
+                passwordEl.classList.add('border-red-500');
+                confirmPasswordEl.classList.add('border-red-500');
+                submitButton.disabled = true;
+                return false;
+            } else {
+                errorEl.classList.add('hidden');
+                passwordEl.classList.remove('border-red-500');
+                confirmPasswordEl.classList.remove('border-red-500');
+                submitButton.disabled = false;
+                return isMatch || (passwordValue === "" && confirmValue === "");
+            }
+        }
+
+        // Registration form listeners
+        function attachFormListeners() {
+            const form = document.getElementById('registrationForm');
+            if (!form) return;
+
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const passwordError = document.getElementById('passwordError');
+            const submitButton = form.querySelector('button[type="submit"]');
+
+            // Real-time validation
+            const realTimeValidator = () => validatePasswords(password, confirmPassword, passwordError, submitButton);
+            password.addEventListener('input', realTimeValidator);
+            confirmPassword.addEventListener('input', realTimeValidator);
+
+            // Form submission
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); 
+                
+                if (password.value !== "" && validatePasswords(password, confirmPassword, passwordError, submitButton)) {
+                    const formData = new FormData(form);
+                    appState.fullName = formData.get('fullName');
+                    appState.email = formData.get('email');
+                    appState.country = formData.get('country');
+                    appState.passwordHash = password.value; 
+                    appState.isRegistered = true;
+                    appState.rememberMe = true; // Auto-remember on registration
+                    
+                    // Save credentials after registration
+                    saveCredentials();
+                    
+                    window.location.hash = '#success';
+                }
+            });
+        }
+
+        // Login form listeners
+        function attachLoginListeners() {
+            const form = document.getElementById('loginForm');
+            if (!form) return;
+
+            const emailInput = document.getElementById('loginEmail');
+            const passwordInput = document.getElementById('loginPassword');
+            const errorElement = document.getElementById('loginError');
+            const rememberMeCheckbox = document.getElementById('rememberMe');
+            
+            // Pre-fill if credentials are saved
+            if (appState.rememberMe) {
+                emailInput.value = appState.email;
+                rememberMeCheckbox.checked = true;
+            }
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const enteredEmail = emailInput.value;
+                const enteredPassword = passwordInput.value;
+                appState.rememberMe = rememberMeCheckbox.checked;
+
+                if (
+                    appState.isRegistered &&
+                    enteredEmail === appState.email &&
+                    enteredPassword === appState.passwordHash
+                ) {
+                    // Login successful
+                    appState.isRegistered = true;
+                    errorElement.classList.add('hidden');
+                    
+                    // Save credentials if remember me is checked
+                    if (appState.rememberMe) {
+                        saveCredentials();
+                    } else {
+                        clearCredentials();
+                    }
+
+                    const targetRoute = appState.settings?.application?.defaultView || '#dashboard';
+                    window.location.hash = targetRoute;
+                } else {
+                    // Login failed
+                    errorElement.textContent = "Invalid email or password.";
+                    errorElement.classList.remove('hidden');
+                }
+            });
+        }
+        
+        // Start the app
+        window.addEventListener('hashchange', routeApp);
+        window.addEventListener('load', () => {
+            loadSavedCredentials(); // Load credentials on app start
+            applyGlobalPreferences();
+            routeApp();
+        });
+    </script>
+
+    <!-- Colorblind accessibility filters -->
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <filter id="protanopiaFilter">
+                <feColorMatrix type="matrix" values="0.56667 0.43333 0 0 0 0.55833 0.44167 0 0 0 0 0.24167 0.75833 0 0 0 0 0 1 0" />
+            </filter>
+            <filter id="deuteranopiaFilter">
+                <feColorMatrix type="matrix" values="0.625 0.375 0 0 0 0.7 0.3 0 0 0 0 0.3 0.7 0 0 0 0 0 1 0" />
+            </filter>
+            <filter id="tritanopiaFilter">
+                <feColorMatrix type="matrix" values="0.95 0.05 0 0 0 0 0.43333 0.56667 0 0 0 0.475 0.525 0 0 0 0 0 1 0" />
+            </filter>
+        </defs>
+    </svg>
+</body>
+</html>

@@ -1,0 +1,76 @@
+/* Basic Reset and Body Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5; /* Light grey background */
+    display: flex; /* Centers the content */
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    min-height: 100vh; /* Ensures the page takes full viewport height */
+    margin: 0;
+}
+
+/* Container for the Form */
+.container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px; /* Limits the form width */
+}
+
+/* Styles for the Title */
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+/* Groups the label and input together */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Style for Labels */
+label {
+    display: block; /* Makes the label take up its own line */
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+/* Style for all Inputs and Select */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select {
+    width: 100%; /* Makes the input stretch to the full width of its parent */
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Includes padding and border in the element's total width/height */
+    font-size: 16px;
+}
+
+/* Checkbox Style */
+.form-check {
+    margin-bottom: 20px;
+}
+
+/* Style for the Submit Button */
+button[type="submit"] {
+    width: 100%;
+    background-color: #64d09a8c; /* Blue button */
+    color: rgb(168, 17, 17);
+    padding: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
