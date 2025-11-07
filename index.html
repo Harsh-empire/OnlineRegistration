@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        /* Custom styles - trying to make this look cool! */
+    /* Custom component styling */
 
         :root {
             --app-font-size: 16px;
@@ -18,7 +18,7 @@
             font-size: var(--app-font-size);
         }
         
-        /* Animated background - spent way too long on this lol */
+    /* Animated background gradient */
         body {
             background: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
             background-size: 400% 400%;
@@ -163,30 +163,35 @@
             filter: grayscale(100%);
         }
         
-        /* Glass effect - learned this from a YouTube tutorial */
+    /* Glass effect container styling */
         .glass-effect {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
+        .form-option,
         .terms-container {
             background: rgba(249, 250, 251, 0.95);
         }
 
+        body.theme-dark .form-option,
         body.theme-dark .terms-container {
             background: rgba(30, 41, 59, 0.85);
             border-color: rgba(148, 163, 184, 0.45) !important;
         }
 
+        body.theme-dark .form-option label,
         body.theme-dark .terms-container label {
             color: #e2e8f0;
         }
 
+        body.theme-dark .form-option a,
         body.theme-dark .terms-container a {
             color: #c4b5fd;
         }
 
+        body.theme-dark .form-option a:hover,
         body.theme-dark .terms-container a:hover {
             color: #a855f7;
         }
@@ -279,7 +284,7 @@
             overflow: hidden;
         }
         
-        /* Shimmer effect I found online - pretty neat! */
+    /* Button shimmer sweep effect */
         .btn-primary::before {
             content: '';
             position: absolute;
@@ -324,7 +329,7 @@
             }
         }
         
-        /* Metric cards - hover makes them pop */
+    /* Metric card hover interaction */
         .metric-card {
             transition: all 0.3s ease;
             cursor: pointer;
@@ -376,6 +381,7 @@
             country: "",
             isRegistered: false,
             rememberMe: false,
+            pendingLoginEmail: '',
             
             // Dashboard data
             projects: 12,
@@ -538,6 +544,120 @@
             appState.fullName = composedName || 'Guest User';
         }
 
+        function loadRegisteredAccounts() {
+            try {
+                const raw = localStorage.getItem('registeredUsers');
+                if (!raw) {
+                    return [];
+                }
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) {
+                    return [];
+                }
+                return parsed
+                    .map(entry => {
+                        if (typeof entry === 'string') {
+                            return { email: entry.toLowerCase(), passwordHash: '', firstName: '', middleName: '', lastName: '', country: '' };
+                        }
+                        if (entry && typeof entry === 'object' && typeof entry.email === 'string') {
+                            return {
+                                email: entry.email.toLowerCase(),
+                                passwordHash: entry.passwordHash || '',
+                                firstName: entry.firstName || '',
+                                middleName: entry.middleName || '',
+                                lastName: entry.lastName || '',
+                                country: entry.country || ''
+                            };
+                        }
+                        return null;
+                    })
+                    .filter(Boolean);
+            } catch (error) {
+                console.warn('Error reading registered user list', error);
+                return [];
+            }
+        }
+
+        function saveRegisteredAccounts(accounts) {
+            const uniqueAccounts = [];
+            const seen = new Set();
+            (accounts || []).forEach(account => {
+                if (!account || typeof account.email !== 'string') {
+                    return;
+                }
+                const normalizedEmail = account.email.toLowerCase();
+                if (seen.has(normalizedEmail)) {
+                    return;
+                }
+                seen.add(normalizedEmail);
+                uniqueAccounts.push({
+                    email: normalizedEmail,
+                    passwordHash: account.passwordHash || '',
+                    firstName: account.firstName || '',
+                    middleName: account.middleName || '',
+                    lastName: account.lastName || '',
+                    country: account.country || ''
+                });
+            });
+            localStorage.setItem('registeredUsers', JSON.stringify(uniqueAccounts));
+        }
+
+        function rememberRegisteredAccount(account = {}) {
+            const normalizedEmail = (account.email || '').toLowerCase();
+            if (!normalizedEmail) {
+                return;
+            }
+            const accounts = loadRegisteredAccounts();
+            const payload = {
+                email: normalizedEmail,
+                passwordHash: account.passwordHash || '',
+                firstName: account.firstName || '',
+                middleName: account.middleName || '',
+                lastName: account.lastName || '',
+                country: account.country || ''
+            };
+            const existingIndex = accounts.findIndex(item => item.email === normalizedEmail);
+            if (existingIndex >= 0) {
+                const current = accounts[existingIndex];
+                accounts[existingIndex] = {
+                    email: normalizedEmail,
+                    passwordHash: payload.passwordHash || current.passwordHash || '',
+                    firstName: payload.firstName || current.firstName || '',
+                    middleName: payload.middleName || current.middleName || '',
+                    lastName: payload.lastName || current.lastName || '',
+                    country: payload.country || current.country || ''
+                };
+            } else {
+                accounts.push(payload);
+            }
+            saveRegisteredAccounts(accounts);
+        }
+
+        function removeRegisteredAccount(email) {
+            const normalizedEmail = (email || '').toLowerCase();
+            if (!normalizedEmail) {
+                return;
+            }
+            const accounts = loadRegisteredAccounts().filter(account => account.email !== normalizedEmail);
+            saveRegisteredAccounts(accounts);
+        }
+
+        function isEmailRegistered(email) {
+            const normalizedEmail = (email || '').toLowerCase();
+            if (!normalizedEmail) {
+                return false;
+            }
+            return loadRegisteredAccounts().some(account => account.email === normalizedEmail);
+        }
+
+        function getRegisteredAccount(email) {
+            const normalizedEmail = (email || '').toLowerCase();
+            if (!normalizedEmail) {
+                return null;
+            }
+            return loadRegisteredAccounts().find(account => account.email === normalizedEmail) || null;
+        }
+
         // Load saved credentials from localStorage
         function loadSavedCredentials() {
             const saved = localStorage.getItem('userCredentials');
@@ -633,6 +753,17 @@
                         appState.alertsList = data.alertsList;
                     }
                     appState.rememberMe = data.rememberMe ?? true;
+                    if (appState.email && appState.email !== 'guest@example.com') {
+                        rememberRegisteredAccount({
+                            email: appState.email,
+                            passwordHash: appState.passwordHash,
+                            firstName: appState.firstName,
+                            middleName: appState.middleName,
+                            lastName: appState.lastName,
+                            country: appState.country
+                        });
+                    }
+                    appState.pendingLoginEmail = '';
                     updateDashboardCounts();
                     applyGlobalPreferences();
                 } catch (e) {
@@ -658,6 +789,18 @@
                     settings: appState.settings,
                     rememberMe: true
                 };
+                if (appState.email && appState.email !== 'guest@example.com') {
+                    if (appState.email && appState.email !== 'guest@example.com') {
+                        rememberRegisteredAccount({
+                            email: appState.email,
+                            passwordHash: appState.passwordHash,
+                            firstName: appState.firstName,
+                            middleName: appState.middleName,
+                            lastName: appState.lastName,
+                            country: appState.country
+                        });
+                    }
+                }
                 localStorage.setItem('userCredentials', JSON.stringify(data));
             }
         }
@@ -666,6 +809,7 @@
         function clearCredentials() {
             localStorage.removeItem('userCredentials');
             appState.rememberMe = false;
+            appState.pendingLoginEmail = '';
         }
 
         // Recalculate dashboard numbers so cards stay legit
@@ -677,7 +821,7 @@
 
         const rootElement = document.getElementById('app');
 
-        // Country list - yes it's long but works fine
+    // Country list options
         const countryOptions = `
             <option value="" disabled selected>--- Select your Country ---</option>
             <option value="af">Afghanistan</option><option value="al">Albania</option><option value="dz">Algeria</option>
@@ -798,7 +942,11 @@
             if (!confirm('This will delete your account and stored data. Continue?')) {
                 return;
             }
+            const emailToRemove = appState.email;
             clearCredentials();
+            if (emailToRemove && emailToRemove !== 'guest@example.com') {
+                removeRegisteredAccount(emailToRemove);
+            }
             appState = JSON.parse(JSON.stringify(defaultAppState));
             updateDashboardCounts();
             applyGlobalPreferences();
@@ -1060,12 +1208,15 @@
                 nameState.lastName = derived.lastName;
             }
 
+            const rememberChecked = initialData?.isRegistered ? !!initialData.rememberMe : true;
+            const rememberCheckedAttr = rememberChecked ? 'checked' : '';
+
             const escapeAttribute = (value) => (value || '').replace(/"/g, '&quot;');
 
             const formHTML = `
                 <div class="w-full max-w-2xl bg-white p-10 rounded-2xl shadow-2xl glass-effect card-entrance">
                     <header class="text-center mb-10">
-                        <!-- Cool icon -->
+                        <!-- Icon badge -->
                         <div class="mx-auto w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-5 shadow-xl">
                             <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
@@ -1224,8 +1375,15 @@
                             </div>
                         </div>
 
+                        <div class="form-option flex items-center space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <input type="checkbox" id="registerRemember" name="registerRemember" class="mt-1 h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2" ${rememberCheckedAttr}>
+                            <label for="registerRemember" class="text-sm text-gray-700 select-none leading-relaxed">
+                                Remember me on this device
+                            </label>
+                        </div>
+
                         <!-- Terms checkbox -->
-                        <div class="terms-container flex items-start space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div class="terms-container form-option flex items-start space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
                             <input type="checkbox" id="terms" name="terms" required class="mt-1 h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
                             <label for="terms" class="text-sm text-gray-700 select-none leading-relaxed">
                                 I agree to the <a href="#" class="text-purple-600 hover:text-purple-800 font-semibold hover:underline">Terms and Conditions</a> and <a href="#" class="text-purple-600 hover:text-purple-800 font-semibold hover:underline">Privacy Policy</a>
@@ -1876,6 +2034,7 @@
 
             profileForm.addEventListener('submit', (event) => {
                 event.preventDefault();
+                const previousEmail = appState.email;
                 const formData = new FormData(profileForm);
 
                 const newPassword = formData.get('profileNewPassword');
@@ -1934,8 +2093,23 @@
                         lastName: appState.profile.lastName
                     });
                 }
-                appState.email = (formData.get('profileEmail') || appState.email).trim();
+                const updatedEmail = ((formData.get('profileEmail') || appState.email).trim()).toLowerCase();
+                appState.email = updatedEmail;
                 appState.country = appState.profile.country || appState.country;
+
+                if (previousEmail && previousEmail.toLowerCase() !== updatedEmail.toLowerCase() && previousEmail !== 'guest@example.com') {
+                    removeRegisteredAccount(previousEmail);
+                }
+                if (updatedEmail && updatedEmail !== 'guest@example.com') {
+                    rememberRegisteredAccount({
+                        email: updatedEmail,
+                        passwordHash: appState.passwordHash,
+                        firstName: appState.firstName,
+                        middleName: appState.middleName,
+                        lastName: appState.lastName,
+                        country: appState.country
+                    });
+                }
 
                 updateDashboardCounts();
 
@@ -2875,25 +3049,57 @@
             // Form submission
             form.addEventListener('submit', function(event) {
                 event.preventDefault(); 
-                
+
+                const formData = new FormData(form);
+                const firstName = (formData.get('firstName') || '').trim();
+                const middleName = (formData.get('middleName') || '').trim();
+                const lastName = (formData.get('lastName') || '').trim();
+                const normalizedEmail = ((formData.get('email') || '').trim()).toLowerCase();
+                const rememberPreference = !!formData.get('registerRemember');
+
+                if (isEmailRegistered(normalizedEmail)) {
+                    showToast('Email already registered. Please log in.', 'error');
+                    appState.pendingLoginEmail = normalizedEmail;
+                    window.location.hash = '#login';
+                    setTimeout(() => {
+                        if (!appState.pendingLoginEmail) {
+                            return;
+                        }
+                        const loginEmailInput = document.getElementById('loginEmail');
+                        if (loginEmailInput) {
+                            loginEmailInput.value = appState.pendingLoginEmail;
+                        }
+                    }, 0);
+                    return;
+                }
+
                 if (password.value !== "" && validatePasswords(password, confirmPassword, passwordError, submitButton)) {
-                    const formData = new FormData(form);
-                    const firstName = (formData.get('firstName') || '').trim();
-                    const middleName = (formData.get('middleName') || '').trim();
-                    const lastName = (formData.get('lastName') || '').trim();
                     updateNameFields({ firstName, middleName, lastName });
                     appState.profile.firstName = firstName;
                     appState.profile.middleName = middleName;
                     appState.profile.lastName = lastName;
-                    appState.email = formData.get('email');
+                    appState.email = normalizedEmail;
                     appState.country = formData.get('country');
+                    appState.profile.country = appState.country;
                     appState.passwordHash = password.value; 
                     appState.isRegistered = true;
-                    appState.rememberMe = true; // Auto-remember on registration
-                    
-                    // Save credentials after registration
-                    saveCredentials();
-                    
+                    appState.rememberMe = rememberPreference;
+                    rememberRegisteredAccount({
+                        email: normalizedEmail,
+                        passwordHash: appState.passwordHash,
+                        firstName,
+                        middleName,
+                        lastName,
+                        country: appState.country
+                    });
+
+                    if (rememberPreference) {
+                        saveCredentials();
+                    } else {
+                        clearCredentials();
+                    }
+
+                    appState.pendingLoginEmail = '';
                     window.location.hash = '#success';
                 }
             });
@@ -2915,23 +3121,54 @@
                 rememberMeCheckbox.checked = true;
             }
 
+            if (appState.pendingLoginEmail) {
+                emailInput.value = appState.pendingLoginEmail;
+                appState.pendingLoginEmail = '';
+            }
+
             form.addEventListener('submit', function(event) {
                 event.preventDefault();
 
-                const enteredEmail = emailInput.value;
+                const enteredEmail = (emailInput.value || '').trim().toLowerCase();
+                emailInput.value = enteredEmail;
                 const enteredPassword = passwordInput.value;
                 appState.rememberMe = rememberMeCheckbox.checked;
 
-                if (
-                    appState.isRegistered &&
-                    enteredEmail === appState.email &&
-                    enteredPassword === appState.passwordHash
-                ) {
-                    // Login successful
+                const sessionMatch = appState.isRegistered && enteredEmail === appState.email && enteredPassword === appState.passwordHash;
+                const storedAccount = getRegisteredAccount(enteredEmail);
+                const storedMatch = !!storedAccount && storedAccount.passwordHash === enteredPassword;
+
+                if (sessionMatch || storedMatch) {
+                    if (!sessionMatch && storedMatch && storedAccount) {
+                        updateNameFields({
+                            firstName: storedAccount.firstName,
+                            middleName: storedAccount.middleName,
+                            lastName: storedAccount.lastName
+                        });
+                        appState.profile.firstName = storedAccount.firstName || appState.profile.firstName;
+                        appState.profile.middleName = storedAccount.middleName || appState.profile.middleName;
+                        appState.profile.lastName = storedAccount.lastName || appState.profile.lastName;
+                        appState.email = storedAccount.email;
+                        appState.country = storedAccount.country || appState.country;
+                        appState.profile.country = storedAccount.country || appState.profile.country;
+                        if (storedAccount.passwordHash) {
+                            appState.passwordHash = storedAccount.passwordHash;
+                        }
+                        appState.isRegistered = true;
+                    }
+
                     appState.isRegistered = true;
                     errorElement.classList.add('hidden');
-                    
-                    // Save credentials if remember me is checked
+                    rememberRegisteredAccount({
+                        email: appState.email,
+                        passwordHash: appState.passwordHash,
+                        firstName: appState.firstName,
+                        middleName: appState.middleName,
+                        lastName: appState.lastName,
+                        country: appState.country
+                    });
+                    appState.pendingLoginEmail = '';
+
                     if (appState.rememberMe) {
                         saveCredentials();
                     } else {
@@ -2941,7 +3178,6 @@
                     const targetRoute = appState.settings?.application?.defaultView || '#dashboard';
                     window.location.hash = targetRoute;
                 } else {
-                    // Login failed
                     errorElement.textContent = "Invalid email or password.";
                     errorElement.classList.remove('hidden');
                 }
