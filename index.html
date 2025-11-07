@@ -4,11 +4,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration & Dashboard</title>
     
-    <!-- Using Tailwind CDN for now - TODO: switch to local build for production -->
+   
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-    /* Custom component styling */
+    
 
         :root {
             --app-font-size: 16px;
@@ -18,7 +18,7 @@
             font-size: var(--app-font-size);
         }
         
-    /* Animated background gradient */
+    
         body {
             background: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
             background-size: 400% 400%;
@@ -111,7 +111,8 @@
             color: #e2e8f0 !important;
         }
 
-        body.theme-dark .bg-green-100,
+    body.theme-dark .bg-blue-50,
+    body.theme-dark .bg-green-100,
         body.theme-dark .bg-blue-100,
         body.theme-dark .bg-yellow-100,
         body.theme-dark .bg-purple-100,
@@ -132,6 +133,10 @@
         body.theme-dark .border-yellow-100,
         body.theme-dark .border-blue-100 {
             border-color: rgba(99, 102, 241, 0.3) !important;
+        }
+
+        body.theme-dark .divide-blue-100 > :not([hidden]) ~ :not([hidden]) {
+            border-color: rgba(99, 102, 241, 0.25);
         }
 
         body.high-contrast {
@@ -163,7 +168,7 @@
             filter: grayscale(100%);
         }
         
-    /* Glass effect container styling */
+    
         .glass-effect {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -348,7 +353,7 @@
             color: #c7d2fe;
         }
 
-        /* Input styling */
+        
         .form-input {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             background: rgba(249, 250, 251, 0.8);
@@ -372,7 +377,7 @@
             letter-spacing: 0.025em;
         }
         
-        /* Error shake animation */
+        
         .error-message {
             margin-top: 0.5rem;
             font-size: 0.875rem;
@@ -391,7 +396,7 @@
             max-width: 96%;
         }
         
-        /* Button styles with hover effect */
+        
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             transition: all 0.3s ease;
@@ -399,7 +404,7 @@
             overflow: hidden;
         }
         
-    /* Button shimmer sweep effect */
+    
         .btn-primary::before {
             content: '';
             position: absolute;
@@ -428,7 +433,7 @@
             box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);
         }
         
-        /* Card slide in animation */
+        
         .card-entrance {
             animation: cardSlideIn 0.5s ease-out;
         }
@@ -444,7 +449,7 @@
             }
         }
         
-    /* Metric card hover interaction */
+    
         .metric-card {
             transition: all 0.3s ease;
             cursor: pointer;
@@ -455,7 +460,7 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
-        /* Navigation links */
+        
         .nav-link {
             transition: all 0.2s ease;
         }
@@ -464,7 +469,7 @@
             transform: translateX(5px);
         }
         
-        /* Success checkmark pop effect */
+        
         @keyframes checkmarkPop {
             0% { transform: scale(0) rotate(45deg); }
             50% { transform: scale(1.2) rotate(45deg); }
@@ -478,14 +483,14 @@
 </head>
 <body class="bg-gray-100 flex items-start md:items-start justify-center min-h-screen px-4 py-12 md:py-16 font-sans antialiased">
     
-    <!-- Main app container -->
+    
     <div id="app" class="w-full flex justify-center items-start">
-        <!-- Dynamic content goes here -->
+        
     </div>
 
-    <!-- JavaScript - all the magic happens here -->
+    
     <script>
-        // Global state object - keeps track of user data
+        
         let appState = {
             firstName: "",
             middleName: "",
@@ -498,7 +503,7 @@
             rememberMe: false,
             pendingLoginEmail: '',
             
-            // Dashboard data
+            
             projects: 12,
             tasks: 5,
             notifications: 3,
@@ -508,7 +513,7 @@
                 { id: 3, description: 'Review required on Profile page.', time: 'Yesterday' },
             ],
             
-            // Projects list
+            
             projectsList: [
                 { id: 1, name: 'Website Redesign', status: 'In Progress', progress: 75, dueDate: 'Nov 15, 2025' },
                 { id: 2, name: 'Mobile App Development', status: 'In Progress', progress: 60, dueDate: 'Dec 1, 2025' },
@@ -523,8 +528,8 @@
                 { id: 11, name: 'Customer Portal', status: 'In Progress', progress: 65, dueDate: 'Dec 5, 2025' },
                 { id: 12, name: 'Analytics Dashboard', status: 'In Progress', progress: 50, dueDate: 'Nov 30, 2025' }
             ],
+
             
-            // Tasks list
             tasksList: [
                 { id: 1, title: 'Fix login button bug', priority: 'High', status: 'Pending', assignee: 'You' },
                 { id: 2, title: 'Update user documentation', priority: 'Medium', status: 'In Progress', assignee: 'You' },
@@ -533,14 +538,14 @@
                 { id: 5, title: 'Create test cases for checkout', priority: 'Medium', status: 'Pending', assignee: 'You' }
             ],
             
-            // Alerts list
+            
             alertsList: [
                 { id: 1, message: 'Email verification pending.', type: 'email', resolved: false },
                 { id: 2, message: 'Update your profile picture.', type: 'profile', resolved: false },
                 { id: 3, message: 'Review new privacy policy.', type: 'policy', resolved: false }
             ],
 
-            // Profile details stash
+            
             profile: {
                 firstName: '',
                 middleName: '',
@@ -773,7 +778,7 @@
             return loadRegisteredAccounts().find(account => account.email === normalizedEmail) || null;
         }
 
-        // Load saved credentials from localStorage
+        
         function loadSavedCredentials() {
             const saved = localStorage.getItem('userCredentials');
             if (saved) {
@@ -887,7 +892,7 @@
             }
         }
         
-        // Save credentials to localStorage
+            
         function saveCredentials() {
             if (appState.rememberMe) {
                 const data = {
@@ -920,14 +925,14 @@
             }
         }
         
-        // Clear saved credentials
+        
         function clearCredentials() {
             localStorage.removeItem('userCredentials');
             appState.rememberMe = false;
             appState.pendingLoginEmail = '';
         }
 
-        // Recalculate dashboard numbers so cards stay legit
+        
         function updateDashboardCounts() {
             appState.projects = appState.projectsList.length;
             appState.tasks = appState.tasksList.filter(task => task.status !== 'Completed').length;
@@ -936,7 +941,7 @@
 
         const rootElement = document.getElementById('app');
 
-        // Country list options
+            
         const rawCountryOptions = `
             <option value="" disabled selected>--- Select your Country ---</option>
             <option value="af">Afghanistan</option><option value="al">Albania</option><option value="dz">Algeria</option>
@@ -2755,18 +2760,36 @@
             const s = appState.settings;
             const theme = s.appearance.theme;
             const sessionsHTML = s.account.activeSessions.length
-                ? s.account.activeSessions.map(session => `
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white border border-blue-100 rounded-xl shadow-sm">
-                            <div>
-                                <p class="font-semibold text-gray-800">${session.device}</p>
-                                <p class="text-xs text-gray-500">${session.location} • Last active ${session.lastActive}</p>
-                            </div>
-                            <div class="flex items-center gap-3 mt-3 sm:mt-0">
-                                ${session.isCurrent ? '<span class="px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">Current device</span>' : ''}
-                                ${session.isCurrent ? '' : `<button data-session-id="${session.id}" class="px-4 py-2 text-sm font-semibold text-red-600 border border-red-200 rounded-xl hover:text-red-700 hover:border-red-400 transition">Remove</button>`}
-                            </div>
+                ? (() => {
+                    const rows = s.account.activeSessions.map(session => `
+                        <tr class="border-b border-blue-50 last:border-b-0">
+                            <td class="py-3 px-4 font-semibold text-gray-800 align-middle">${session.device}</td>
+                            <td class="py-3 px-4 text-sm text-gray-500 align-middle">${session.location}</td>
+                            <td class="py-3 px-4 text-sm text-gray-500 align-middle">${session.lastActive}</td>
+                            <td class="py-3 px-4 align-middle">
+                                <div class="flex flex-wrap gap-2 items-center">
+                                    ${session.isCurrent ? '<span class="px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">Current device</span>' : ''}
+                                    ${session.isCurrent ? '' : `<button data-session-id="${session.id}" class="px-3 py-1.5 text-xs font-semibold text-red-600 border border-red-200 rounded-xl hover:text-red-700 hover:border-red-400 transition">Remove</button>`}
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                    return `
+                        <div class="overflow-x-auto rounded-xl border border-blue-100 shadow-sm">
+                            <table class="min-w-full divide-y divide-blue-100 text-sm">
+                                <thead class="bg-blue-50 text-xs font-semibold uppercase tracking-wide text-blue-900">
+                                    <tr>
+                                        <th scope="col" class="py-3 px-4 text-left">Device</th>
+                                        <th scope="col" class="py-3 px-4 text-left">Location</th>
+                                        <th scope="col" class="py-3 px-4 text-left">Last Active</th>
+                                        <th scope="col" class="py-3 px-4 text-left">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white">${rows}</tbody>
+                            </table>
                         </div>
-                    `).join('')
+                    `;
+                })()
                 : '<p class="text-sm text-gray-500">No other active sessions.</p>';
 
             const blockedUsersHTML = s.privacy.blockedUsers.length
