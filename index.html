@@ -233,6 +233,121 @@
             color: #a855f7;
         }
 
+        .country-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #d1d5db;
+            background-color: rgba(249, 250, 251, 0.8);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .country-trigger:hover {
+            border-color: #a78bfa;
+            background-color: #ffffff;
+        }
+
+        .country-trigger:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+        }
+
+        .country-trigger-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .country-trigger-flag {
+            width: 24px;
+            height: 18px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+        }
+
+        .country-trigger-placeholder {
+            color: #6b7280;
+        }
+
+        .country-dropdown {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            left: 0;
+            right: 0;
+            z-index: 30;
+            background: #ffffff;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 20px 35px -15px rgba(15, 23, 42, 0.25);
+            max-height: 16rem;
+            overflow-y: auto;
+        }
+
+        .country-option {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 1rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-align: left;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .country-option:hover,
+        .country-option[aria-selected="true"] {
+            background: rgba(129, 140, 248, 0.12);
+            color: #4338ca;
+        }
+
+        .country-option-flag {
+            width: 22px;
+            height: 16px;
+            border-radius: 3px;
+            object-fit: cover;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+        }
+
+        body.theme-dark .country-trigger {
+            background: rgba(30, 41, 59, 0.85);
+            border-color: rgba(148, 163, 184, 0.4);
+            color: #e2e8f0;
+        }
+
+        body.theme-dark .country-trigger:hover {
+            background: rgba(51, 65, 85, 0.9);
+        }
+
+        body.theme-dark .country-trigger-placeholder {
+            color: rgba(148, 163, 184, 0.8);
+        }
+
+        body.theme-dark .country-dropdown {
+            background: rgba(17, 24, 39, 0.98);
+            border-color: rgba(79, 70, 229, 0.35);
+        }
+
+        body.theme-dark .country-option {
+            color: #e2e8f0;
+        }
+
+        body.theme-dark .country-option:hover,
+        body.theme-dark .country-option[aria-selected="true"] {
+            background: rgba(129, 140, 248, 0.18);
+            color: #c7d2fe;
+        }
+
         /* Input styling */
         .form-input {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -361,10 +476,10 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 font-sans antialiased">
+<body class="bg-gray-100 flex items-start md:items-start justify-center min-h-screen px-4 py-12 md:py-16 font-sans antialiased">
     
     <!-- Main app container -->
-    <div id="app" class="w-full h-full flex items-center justify-center">
+    <div id="app" class="w-full flex justify-center items-start">
         <!-- Dynamic content goes here -->
     </div>
 
@@ -821,8 +936,8 @@
 
         const rootElement = document.getElementById('app');
 
-    // Country list options
-        const countryOptions = `
+        // Country list options
+        const rawCountryOptions = `
             <option value="" disabled selected>--- Select your Country ---</option>
             <option value="af">Afghanistan</option><option value="al">Albania</option><option value="dz">Algeria</option>
             <option value="ad">Andorra</option><option value="ao">Angola</option><option value="ar">Argentina</option>
@@ -868,19 +983,259 @@
             <option value="zm">Zambia</option><option value="zw">Zimbabwe</option>
         `;
 
-        function buildCountryOptions(selectedValue) {
-            if (!selectedValue) {
-                return countryOptions;
-            }
-            return countryOptions
-                .replace('disabled selected', 'disabled')
-                .replace(`value="${selectedValue}"`, `value="${selectedValue}" selected`);
-        }
+        const countryNameLookup = {};
+        const countryData = [];
+        const countryDataMap = {};
+
+        rawCountryOptions.replace(/<option value="([a-z]{2})">(.*?)<\/option>/g, (match, code, label) => {
+            const normalized = code.toLowerCase();
+            countryNameLookup[normalized] = label;
+            const countryRecord = {
+                code: normalized,
+                name: label,
+                flagUrl: `https://flagcdn.com/h24/${normalized}.png`
+            };
+            countryData.push(countryRecord);
+            countryDataMap[normalized] = countryRecord;
+            return match;
+        });
         
         // Get country name from code
         function getCountryName(code) {
-            const match = countryOptions.match(new RegExp(`value="${code}">(.*?)<\/option>`));
-            return match ? match[1] : 'The World';
+            const normalized = (code || '').toLowerCase();
+            return countryNameLookup[normalized] || 'The World';
+        }
+
+        function getCountryData(code) {
+            const normalized = (code || '').toLowerCase();
+            return countryDataMap[normalized] || null;
+        }
+
+        let activeCountryPicker = null;
+        let countryPickerEventsBound = false;
+
+        function bindCountryPickerGlobalEvents() {
+            if (countryPickerEventsBound) {
+                return;
+            }
+            document.addEventListener('click', (event) => {
+                if (!activeCountryPicker) {
+                    return;
+                }
+                if (!activeCountryPicker.container.contains(event.target)) {
+                    closeCountryDropdown(activeCountryPicker);
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && activeCountryPicker) {
+                    closeCountryDropdown(activeCountryPicker);
+                    activeCountryPicker.trigger.focus();
+                }
+            });
+
+            countryPickerEventsBound = true;
+        }
+
+        function openCountryDropdown(state) {
+            if (!state) {
+                return;
+            }
+            if (activeCountryPicker && activeCountryPicker !== state) {
+                closeCountryDropdown(activeCountryPicker);
+            }
+            state.dropdown.style.display = 'block';
+            state.trigger.setAttribute('aria-expanded', 'true');
+            if (state.options && state.options.length) {
+                const currentCode = state.hiddenInput.value;
+                const selectedButton = state.options.find((option) => option.dataset.code === currentCode);
+                if (selectedButton) {
+                    selectedButton.scrollIntoView({ block: 'nearest' });
+                } else {
+                    state.dropdown.scrollTop = 0;
+                }
+            }
+            activeCountryPicker = state;
+        }
+
+        function closeCountryDropdown(state) {
+            if (!state) {
+                return;
+            }
+            state.dropdown.style.display = 'none';
+            state.trigger.setAttribute('aria-expanded', 'false');
+            if (activeCountryPicker === state) {
+                activeCountryPicker = null;
+            }
+        }
+
+        function hydrateCountryPickers(scope = document) {
+            bindCountryPickerGlobalEvents();
+            const containers = scope.querySelectorAll('[data-country-picker]');
+            containers.forEach((container) => {
+                if (!container || container.dataset.hydrated === 'true') {
+                    return;
+                }
+                const hiddenInput = container.querySelector('input[type="hidden"]');
+                if (!hiddenInput) {
+                    return;
+                }
+
+                const placeholder = container.dataset.placeholder || 'Select country';
+                const labelId = container.dataset.label || '';
+                const initialValue = (hiddenInput.value || '').toLowerCase();
+
+                const trigger = document.createElement('button');
+                trigger.type = 'button';
+                trigger.className = 'country-trigger';
+                if (hiddenInput.id) {
+                    trigger.id = `${hiddenInput.id}Trigger`;
+                }
+                trigger.setAttribute('aria-haspopup', 'listbox');
+                trigger.setAttribute('aria-expanded', 'false');
+                trigger.setAttribute('role', 'combobox');
+                if (labelId) {
+                    const labelElement = document.getElementById(labelId);
+                    if (labelElement) {
+                        trigger.setAttribute('aria-labelledby', `${labelId}${trigger.id ? ` ${trigger.id}` : ''}`.trim());
+                        labelElement.addEventListener('click', (event) => {
+                            event.preventDefault();
+                            trigger.focus();
+                            trigger.click();
+                        });
+                    }
+                }
+
+                const triggerContent = document.createElement('span');
+                triggerContent.className = 'country-trigger-content';
+
+                const triggerFlag = document.createElement('img');
+                triggerFlag.className = 'country-trigger-flag';
+                triggerFlag.alt = '';
+                triggerFlag.loading = 'lazy';
+                triggerFlag.style.display = 'none';
+
+                const triggerLabel = document.createElement('span');
+                triggerLabel.className = 'country-trigger-placeholder';
+                triggerLabel.textContent = placeholder;
+
+                triggerContent.appendChild(triggerFlag);
+                triggerContent.appendChild(triggerLabel);
+                trigger.appendChild(triggerContent);
+
+                const caretIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                caretIcon.setAttribute('class', 'w-5 h-5 text-gray-400 flex-shrink-0');
+                caretIcon.setAttribute('fill', 'none');
+                caretIcon.setAttribute('stroke', 'currentColor');
+                caretIcon.setAttribute('viewBox', '0 0 24 24');
+                const caretPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                caretPath.setAttribute('stroke-linecap', 'round');
+                caretPath.setAttribute('stroke-linejoin', 'round');
+                caretPath.setAttribute('stroke-width', '2');
+                caretPath.setAttribute('d', 'M19 9l-7 7-7-7');
+                caretIcon.appendChild(caretPath);
+                trigger.appendChild(caretIcon);
+
+                const dropdown = document.createElement('div');
+                dropdown.className = 'country-dropdown';
+                dropdown.setAttribute('role', 'listbox');
+                dropdown.style.display = 'none';
+                const dropdownId = hiddenInput.id ? `${hiddenInput.id}Dropdown` : `countryDropdown-${Math.random().toString(36).slice(2)}`;
+                dropdown.id = dropdownId;
+                trigger.setAttribute('aria-controls', dropdownId);
+
+                const options = [];
+                const selectCountry = (code) => {
+                    const normalized = (code || '').toLowerCase();
+                    hiddenInput.value = normalized;
+                    updateTriggerUI();
+                    closeCountryDropdown(state);
+                    const changeEvent = new Event('change', { bubbles: true });
+                    hiddenInput.dispatchEvent(changeEvent);
+                };
+
+                const updateTriggerUI = () => {
+                    const selection = getCountryData(hiddenInput.value);
+                    const hasSelection = !!selection;
+                    if (hasSelection) {
+                        triggerFlag.src = selection.flagUrl;
+                        triggerFlag.alt = `${selection.name} flag`;
+                        triggerFlag.style.display = 'block';
+                        triggerLabel.textContent = selection.name;
+                        triggerLabel.classList.remove('country-trigger-placeholder');
+                    } else {
+                        triggerFlag.src = '';
+                        triggerFlag.alt = '';
+                        triggerFlag.style.display = 'none';
+                        triggerLabel.textContent = placeholder;
+                        triggerLabel.classList.add('country-trigger-placeholder');
+                    }
+
+                    options.forEach((optionButton) => {
+                        const isActive = optionButton.dataset.code === hiddenInput.value;
+                        optionButton.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    });
+                };
+
+                countryData.forEach((country) => {
+                    const optionButton = document.createElement('button');
+                    optionButton.type = 'button';
+                    optionButton.className = 'country-option';
+                    optionButton.dataset.code = country.code;
+                    optionButton.setAttribute('role', 'option');
+                    optionButton.setAttribute('aria-selected', country.code === initialValue ? 'true' : 'false');
+
+                    const optionFlag = document.createElement('img');
+                    optionFlag.className = 'country-option-flag';
+                    optionFlag.src = country.flagUrl;
+                    optionFlag.alt = `${country.name} flag`;
+                    optionFlag.loading = 'lazy';
+
+                    const optionLabel = document.createElement('span');
+                    optionLabel.textContent = country.name;
+
+                    optionButton.appendChild(optionFlag);
+                    optionButton.appendChild(optionLabel);
+
+                    optionButton.addEventListener('click', () => {
+                        selectCountry(country.code);
+                    });
+
+                    dropdown.appendChild(optionButton);
+                    options.push(optionButton);
+                });
+
+                trigger.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    if (dropdown.style.display === 'none') {
+                        openCountryDropdown(state);
+                    } else {
+                        closeCountryDropdown(state);
+                    }
+                });
+
+                hiddenInput.value = initialValue;
+
+                container.insertBefore(trigger, hiddenInput);
+                container.appendChild(dropdown);
+
+                const state = {
+                    container,
+                    trigger,
+                    dropdown,
+                    hiddenInput,
+                    triggerFlag,
+                    triggerLabel,
+                    placeholder,
+                    options,
+                    updateTriggerUI
+                };
+
+                trigger.dataset.pickerId = hiddenInput.id || '';
+                container.dataset.hydrated = 'true';
+
+                updateTriggerUI();
+            });
         }
 
         // Lightweight toast notifications so the UX feels alive
@@ -1191,9 +1546,10 @@
         }
         
         function renderForm(initialData = appState) {
-            // Center the form
-            rootElement.classList.add('justify-center', 'items-center');
-            rootElement.classList.remove('justify-start', 'items-start', 'md:pt-10');
+            // Position the form closer to the top so first fields are visible immediately
+            rootElement.classList.add('justify-center', 'items-start', 'md:pt-10');
+            rootElement.classList.remove('items-center');
+            rootElement.classList.remove('justify-start');
 
             const nameState = {
                 firstName: (initialData.firstName || initialData.profile?.firstName || '').trim(),
@@ -1356,22 +1712,14 @@
 
                         <!-- Country Dropdown Select -->
                         <div class="form-group">
-                            <label for="country" class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
-                            <div class="relative">
+                            <label id="countryLabel" class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
+                            <div class="relative" data-country-picker="register" data-placeholder="Select your country" data-label="countryLabel">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </div>
-                                <select id="country" name="country" required class="form-input mt-1 block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none appearance-none bg-white text-gray-900">
-                                    <!-- Replaces the selected option in the full list -->
-                                    ${buildCountryOptions(initialData.country)}
-                                </select>
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </div>
+                                <input type="hidden" id="country" name="country" value="${(initialData.country || '').toLowerCase()}">
                             </div>
                         </div>
 
@@ -1412,6 +1760,7 @@
             `;
             
             rootElement.innerHTML = formHTML;
+            hydrateCountryPickers(rootElement);
             attachFormListeners(); 
         }
 
@@ -1834,8 +2183,15 @@
                                         </div>
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                                             <div class="md:col-span-1">
-                                                <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileCountry">Country</label>
-                                                <select id="profileCountry" name="profileCountry" class="form-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none">${buildCountryOptions(profile.country || appState.country)}</select>
+                                                <label id="profileCountryLabel" class="block text-sm font-semibold text-gray-700 mb-2">Country</label>
+                                                <div class="relative" data-country-picker="profile" data-placeholder="Select country" data-label="profileCountryLabel">
+                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                        </svg>
+                                                    </div>
+                                                    <input type="hidden" id="profileCountry" name="profileCountry" value="${(profile.country || appState.country || '').toLowerCase()}">
+                                                </div>
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-semibold text-gray-700 mb-2" for="profileCity">City</label>
@@ -1956,6 +2312,7 @@
             `;
 
             rootElement.innerHTML = profileHTML;
+            hydrateCountryPickers(rootElement);
             attachProfileListeners();
         }
 
@@ -2036,6 +2393,7 @@
                 event.preventDefault();
                 const previousEmail = appState.email;
                 const formData = new FormData(profileForm);
+                const profileCountryValue = ((formData.get('profileCountry') || '').trim()).toLowerCase();
 
                 const newPassword = formData.get('profileNewPassword');
                 const confirmPassword = formData.get('profileConfirmPassword');
@@ -2055,7 +2413,7 @@
                     dob: formData.get('profileDob') || '',
                     gender: formData.get('profileGender') || '',
                     bio: (formData.get('profileBio') || '').trim(),
-                    country: formData.get('profileCountry') || appState.country,
+                    country: profileCountryValue || appState.country,
                     city: (formData.get('profileCity') || '').trim(),
                     address: (formData.get('profileAddress') || '').trim(),
                     phone: (formData.get('profilePhone') || '').trim(),
@@ -3055,7 +3413,17 @@
                 const middleName = (formData.get('middleName') || '').trim();
                 const lastName = (formData.get('lastName') || '').trim();
                 const normalizedEmail = ((formData.get('email') || '').trim()).toLowerCase();
+                const selectedCountry = ((formData.get('country') || '').trim()).toLowerCase();
                 const rememberPreference = !!formData.get('registerRemember');
+
+                if (!selectedCountry) {
+                    showToast('Please choose your country.', 'error');
+                    const triggerButton = form.querySelector('[data-country-picker] .country-trigger');
+                    if (triggerButton) {
+                        triggerButton.focus();
+                    }
+                    return;
+                }
 
                 if (isEmailRegistered(normalizedEmail)) {
                     showToast('Email already registered. Please log in.', 'error');
@@ -3079,7 +3447,7 @@
                     appState.profile.middleName = middleName;
                     appState.profile.lastName = lastName;
                     appState.email = normalizedEmail;
-                    appState.country = formData.get('country');
+                    appState.country = selectedCountry;
                     appState.profile.country = appState.country;
                     appState.passwordHash = password.value; 
                     appState.isRegistered = true;
