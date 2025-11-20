@@ -1,4 +1,4 @@
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -171,6 +171,7 @@
     
         .glass-effect {
             background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
@@ -762,22 +763,6 @@
             saveRegisteredAccounts(accounts);
         }
 
-        function isEmailRegistered(email) {
-            const normalizedEmail = (email || '').toLowerCase();
-            if (!normalizedEmail) {
-                return false;
-            }
-            return loadRegisteredAccounts().some(account => account.email === normalizedEmail);
-        }
-
-        function getRegisteredAccount(email) {
-            const normalizedEmail = (email || '').toLowerCase();
-            if (!normalizedEmail) {
-                return null;
-            }
-            return loadRegisteredAccounts().find(account => account.email === normalizedEmail) || null;
-        }
-
         
         function loadSavedCredentials() {
             const saved = localStorage.getItem('userCredentials');
@@ -940,6 +925,53 @@
         }
 
         const rootElement = document.getElementById('app');
+        const API_BASE_URL = window.APP_API_BASE_URL || 'http://127.0.0.1:8000';
+
+        async function postJson(endpoint, payload = {}) {
+            const target = `${API_BASE_URL}${endpoint}`;
+            const response = await fetch(target, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            let data = null;
+            try {
+                data = await response.json();
+            } catch (error) {
+                // Leave data null; will handle below
+            }
+
+            if (!response.ok || !data) {
+                const message = data?.error || `Request failed (${response.status})`;
+                throw new Error(message);
+            }
+
+            if (data.success === false) {
+                throw new Error(data.error || 'Request failed');
+            }
+
+            return data;
+        }
+
+        function setButtonLoading(button, isLoading, loadingLabel = 'Processing…') {
+            if (!button) return;
+            if (isLoading) {
+                button.dataset.originalLabel = button.dataset.originalLabel || button.innerHTML;
+                button.innerHTML = loadingLabel;
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-not-allowed');
+            } else {
+                if (button.dataset.originalLabel) {
+                    button.innerHTML = button.dataset.originalLabel;
+                    delete button.dataset.originalLabel;
+                }
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        }
 
             
         const rawCountryOptions = `
@@ -3428,7 +3460,7 @@
             confirmPassword.addEventListener('input', realTimeValidator);
 
             // Form submission
-            form.addEventListener('submit', function(event) {
+            form.addEventListener('submit', async function(event) {
                 event.preventDefault(); 
 
                 const formData = new FormData(form);
@@ -3448,40 +3480,48 @@
                     return;
                 }
 
-                if (isEmailRegistered(normalizedEmail)) {
-                    showToast('Email already registered. Please log in.', 'error');
-                    appState.pendingLoginEmail = normalizedEmail;
-                    window.location.hash = '#login';
-                    setTimeout(() => {
-                        if (!appState.pendingLoginEmail) {
-                            return;
-                        }
-                        const loginEmailInput = document.getElementById('loginEmail');
-                        if (loginEmailInput) {
-                            loginEmailInput.value = appState.pendingLoginEmail;
-                        }
-                    }, 0);
+                if (!(password.value !== "" && validatePasswords(password, confirmPassword, passwordError, submitButton))) {
                     return;
                 }
 
-                if (password.value !== "" && validatePasswords(password, confirmPassword, passwordError, submitButton)) {
-                    updateNameFields({ firstName, middleName, lastName });
-                    appState.profile.firstName = firstName;
-                    appState.profile.middleName = middleName;
-                    appState.profile.lastName = lastName;
-                    appState.email = normalizedEmail;
-                    appState.country = selectedCountry;
-                    appState.profile.country = appState.country;
+                const payload = {
+                    email: normalizedEmail,
+                    password: password.value,
+                    firstName,
+                    middleName,
+                    lastName,
+                    country: selectedCountry
+                };
+
+                setButtonLoading(submitButton, true, 'Creating account…');
+
+                try {
+                    const response = await postJson('/register.php', payload);
+                    const serverUser = response.user || {};
+
+                    const resolvedFirst = serverUser.first_name || firstName;
+                    const resolvedMiddle = serverUser.middle_name || middleName;
+                    const resolvedLast = serverUser.last_name || lastName;
+                    const resolvedCountry = serverUser.country || selectedCountry;
+
+                    updateNameFields({ firstName: resolvedFirst, middleName: resolvedMiddle, lastName: resolvedLast });
+                    appState.profile.firstName = resolvedFirst;
+                    appState.profile.middleName = resolvedMiddle;
+                    appState.profile.lastName = resolvedLast;
+                    appState.email = serverUser.email || normalizedEmail;
+                    appState.country = resolvedCountry;
+                    appState.profile.country = resolvedCountry;
                     appState.passwordHash = password.value; 
                     appState.isRegistered = true;
                     appState.rememberMe = rememberPreference;
+
                     rememberRegisteredAccount({
-                        email: normalizedEmail,
+                        email: appState.email,
                         passwordHash: appState.passwordHash,
-                        firstName,
-                        middleName,
-                        lastName,
-                        country: appState.country
+                        firstName: resolvedFirst,
+                        middleName: resolvedMiddle,
+                        lastName: resolvedLast,
+                        country: resolvedCountry
                     });
 
                     if (rememberPreference) {
@@ -3491,7 +3531,17 @@
                     }
 
                     appState.pendingLoginEmail = '';
+                    showToast('Registration successful!');
                     window.location.hash = '#success';
+                } catch (error) {
+                    const message = error.message || 'Unable to register right now.';
+                    showToast(message, 'error');
+                    if (/already registered/i.test(message)) {
+                        appState.pendingLoginEmail = normalizedEmail;
+                        window.location.hash = '#login';
+                    }
+                } finally {
+                    setButtonLoading(submitButton, false);
                 }
             });
         }
@@ -3505,6 +3555,7 @@
             const passwordInput = document.getElementById('loginPassword');
             const errorElement = document.getElementById('loginError');
             const rememberMeCheckbox = document.getElementById('rememberMe');
+            const submitButton = form.querySelector('button[type="submit"]');
             
             // Pre-fill if credentials are saved
             if (appState.rememberMe) {
@@ -3517,7 +3568,7 @@
                 appState.pendingLoginEmail = '';
             }
 
-            form.addEventListener('submit', function(event) {
+            form.addEventListener('submit', async function(event) {
                 event.preventDefault();
 
                 const enteredEmail = (emailInput.value || '').trim().toLowerCase();
@@ -3525,40 +3576,45 @@
                 const enteredPassword = passwordInput.value;
                 appState.rememberMe = rememberMeCheckbox.checked;
 
-                const sessionMatch = appState.isRegistered && enteredEmail === appState.email && enteredPassword === appState.passwordHash;
-                const storedAccount = getRegisteredAccount(enteredEmail);
-                const storedMatch = !!storedAccount && storedAccount.passwordHash === enteredPassword;
+                if (!enteredEmail || !enteredPassword) {
+                    errorElement.textContent = 'Please enter your email and password.';
+                    errorElement.classList.remove('hidden');
+                    return;
+                }
 
-                if (sessionMatch || storedMatch) {
-                    if (!sessionMatch && storedMatch && storedAccount) {
-                        updateNameFields({
-                            firstName: storedAccount.firstName,
-                            middleName: storedAccount.middleName,
-                            lastName: storedAccount.lastName
-                        });
-                        appState.profile.firstName = storedAccount.firstName || appState.profile.firstName;
-                        appState.profile.middleName = storedAccount.middleName || appState.profile.middleName;
-                        appState.profile.lastName = storedAccount.lastName || appState.profile.lastName;
-                        appState.email = storedAccount.email;
-                        appState.country = storedAccount.country || appState.country;
-                        appState.profile.country = storedAccount.country || appState.profile.country;
-                        if (storedAccount.passwordHash) {
-                            appState.passwordHash = storedAccount.passwordHash;
-                        }
-                        appState.isRegistered = true;
-                    }
+                setButtonLoading(submitButton, true, 'Signing in…');
 
+                try {
+                    const response = await postJson('/login.php', {
+                        email: enteredEmail,
+                        password: enteredPassword
+                    });
+
+                    const serverUser = response.user || {};
+                    const resolvedFirst = serverUser.first_name || appState.profile.firstName;
+                    const resolvedMiddle = serverUser.middle_name || appState.profile.middleName;
+                    const resolvedLast = serverUser.last_name || appState.profile.lastName;
+                    const resolvedCountry = serverUser.country || appState.country;
+
+                    updateNameFields({ firstName: resolvedFirst, middleName: resolvedMiddle, lastName: resolvedLast });
+
+                    appState.profile.firstName = resolvedFirst;
+                    appState.profile.middleName = resolvedMiddle;
+                    appState.profile.lastName = resolvedLast;
+                    appState.email = serverUser.email || enteredEmail;
+                    appState.country = resolvedCountry;
+                    appState.profile.country = resolvedCountry;
+                    appState.passwordHash = enteredPassword;
                     appState.isRegistered = true;
-                    errorElement.classList.add('hidden');
+
                     rememberRegisteredAccount({
                         email: appState.email,
                         passwordHash: appState.passwordHash,
-                        firstName: appState.firstName,
-                        middleName: appState.middleName,
-                        lastName: appState.lastName,
-                        country: appState.country
+                        firstName: resolvedFirst,
+                        middleName: resolvedMiddle,
+                        lastName: resolvedLast,
+                        country: resolvedCountry
                     });
-                    appState.pendingLoginEmail = '';
 
                     if (appState.rememberMe) {
                         saveCredentials();
@@ -3566,11 +3622,17 @@
                         clearCredentials();
                     }
 
+                    errorElement.classList.add('hidden');
+                    appState.pendingLoginEmail = '';
+                    showToast('Welcome back!');
+
                     const targetRoute = appState.settings?.application?.defaultView || '#dashboard';
                     window.location.hash = targetRoute;
-                } else {
-                    errorElement.textContent = "Invalid email or password.";
+                } catch (error) {
+                    errorElement.textContent = error.message || 'Invalid email or password.';
                     errorElement.classList.remove('hidden');
+                } finally {
+                    setButtonLoading(submitButton, false);
                 }
             });
         }
@@ -3585,7 +3647,7 @@
     </script>
 
     <!-- Colorblind accessibility filters -->
-    <svg width="0" height="0" style="position:absolute">
+    <svg width="0" height="0" class="sr-only-svg">
         <defs>
             <filter id="protanopiaFilter">
                 <feColorMatrix type="matrix" values="0.56667 0.43333 0 0 0 0.55833 0.44167 0 0 0 0 0.24167 0.75833 0 0 0 0 0 1 0" />
